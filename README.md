@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ⚡ FlashForge AI: The Smart Flashcard Engine
 
-## Getting Started
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://flashforge-engine.onrender.com)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-ORM-blue)](https://www.prisma.io/)
+[![Gemini AI](https://img.shields.io/badge/AI-Gemini%201.5-orange)](https://deepmind.google/technologies/gemini/)
 
-First, run the development server:
+FlashForge is an AI-native study platform that transforms messy PDF documents into structured, teacher-quality flashcard decks. Built with cognitive science at its core, it uses the **SM-2 Spaced Repetition Algorithm** to optimize long-term retention and mastery.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## ✨ Key Features
+
+*   **📄 AI PDF Ingestion**: Native PDF processing using Google Gemini 1.5 Flash. It identifies core concepts, definitions, worked examples, and common edge cases.
+*   **🧠 SM-2 Spaced Repetition**: A custom implementation of the SuperMemo-2 algorithm that schedules card reviews based on your individual performance.
+*   **🎭 3D Immersive Study**: A beautiful, 3D-animated study interface designed to maximize focus and minimize fatigue.
+*   **🌗 Adaptive UI**: Premium dark/light mode toggle with theme persistence.
+*   **📊 Mastery Analytics**: Detailed progress tracking with mastery rings and accuracy trends.
+*   **🔐 Secure Auth**: Google OAuth integration ensures your study decks and progress are private and secure.
+
+---
+
+## 🛠️ Tech Stack
+
+*   **Framework**: Next.js 15 (App Router)
+*   **AI Engine**: Google Gemini 1.5 Flash
+*   **Database**: PostgreSQL (Railway)
+*   **ORM**: Prisma
+*   **Authentication**: Auth.js v5 (NextAuth)
+*   **Styling**: Vanilla CSS (Modern CSS Variables & Glassmorphism)
+*   **Deployment**: Render (Frontend) & Railway (Database)
+
+---
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+*   Node.js 20+
+*   A Google Cloud Project (for Gemini & OAuth)
+*   A PostgreSQL Database (e.g., Railway)
+
+### 2. Environment Setup
+Create a `.env` file in the root directory:
+
+```env
+DATABASE_URL="your-postgresql-url"
+GEMINI_API_KEY="your-gemini-api-key"
+AUTH_SECRET="your-random-secret"
+AUTH_GOOGLE_ID="your-google-client-id"
+AUTH_GOOGLE_SECRET="your-google-client-secret"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Installation
+```bash
+# Install dependencies
+npm install
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Generate Prisma client
+npx prisma generate
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Sync database schema
+npx prisma db push
 
-## Learn More
+# Start the dev server
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📖 How Spaced Repetition Works
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+FlashForge uses the **SM-2 Algorithm** to calculate when you should next see a card. After each card review, you rate your memory on a scale of 1-4:
 
-## Deploy on Vercel
+-   **1 (Again)**: Relearn immediately.
+-   **2 (Hard)**: Revisit soon.
+-   **3 (Good)**: Solid understanding.
+-   **4 (Easy)**: Move far into the future.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The system then updates the card's `easiness factor` and `interval` to ensure you are always studying at the edge of your forgetting curve.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+Built with ❤️ for the Cuemath AI Builder Challenge.
