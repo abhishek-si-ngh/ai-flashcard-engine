@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { AuthButton } from "@/components/AuthButton";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Prisma } from "@prisma/client";
 
 async function getStats(userId?: string) {
@@ -42,6 +43,7 @@ export default async function HomePage() {
             <span className="logo-text">FlashForge</span>
           </div>
           <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            <ThemeToggle />
             {session && <Link href="/library" className="btn btn-ghost btn-sm">My Library</Link>}
             {session && <Link href="/upload" className="btn btn-primary btn-sm">Upload PDF</Link>}
             <AuthButton />

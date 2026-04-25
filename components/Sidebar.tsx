@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ThemeToggle } from "./ThemeToggle";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -33,6 +34,10 @@ export default function Sidebar() {
       </nav>
 
       <div style={{ marginTop: "auto" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <div className="nav-label" style={{ marginBottom: 0 }}>Theme</div>
+          <ThemeToggle />
+        </div>
         <div className="nav-label">About</div>
         <div style={{ padding: "0.75rem", background: "var(--bg-elevated)", borderRadius: "var(--radius-sm)", border: "1px solid var(--border)" }}>
           <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
