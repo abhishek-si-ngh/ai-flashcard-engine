@@ -1,0 +1,170 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+export interface FlashCard {
+  front: string;
+  back: string;
+  hint?: string;
+  type: "concept" | "definition" | "example" | "edge_case";
+}
+
+export interface GeneratedDeck {
+  title: string;
+  subject: string;
+  description: string;
+  emoji: string;
+  cards: FlashCard[];
+}
+
+const SYSTEM_PROMPT = `You are an expert teacher and cognitive scientist specializing in active recall and spaced repetition learning.
+
+Your task is to generate HIGH-QUALITY flashcards that test deep understanding, not memorization.
+
+Flashcard requirements:
+1. Cover KEY CONCEPTS clearly
+2. Include DEFINITIONS of important terms
+3. Add REAL-WORLD or WORKED EXAMPLES
+4. Include EDGE CASES and tricky scenarios
+5. Test RELATIONSHIPS between ideas
+
+Quality rules:
+- Questions must provoke thinking (avoid simple copy-paste)
+- Avoid generic or vague answers
+- Focus on important concepts, cause-effect, and applications
+- Highlight common mistakes students make
+
+Answer rules:
+- Concise (2–4 lines)
+- Structured (use bullet points if helpful)
+- Include examples where useful
+
+Card types:
+- "concept" → understanding-based
+- "definition" → key terms
+- "example" → applied questions
+- "edge_case" → tricky or uncommon scenarios
+
+Generation rules:
+- Generate 20–40 flashcards depending on content length
+- Cover the ENTIRE content (not just summary)
+- Ensure diversity in question types
+
+Return ONLY valid JSON in this format:
+{
+  "title": "deck title from content",
+  "subject": "subject area",
+  "description": "1-2 sentence summary",
+  "emoji": "single relevant emoji",
+  "cards": [
+    {
+      "front": "question here",
+      "back": "answer here",
+      "hint": "optional hint",
+      "type": "concept"
+    }
+  ]
+}`;
+
+// Retry helper
+async function withRetry<T>(fn: () => Promise<T>, maxRetries = 2): Promise<T> {
+  let attempt = 0;
+  while (attempt < maxRetries) {
+    try {
+      return await fn();
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes("503") && attempt < maxRetries - 1) {
+        attempt++;
+        const delay = Math.pow(2, attempt) * 1000;
+        console.log(`[Gemini] 503 error. Retrying in ${delay}ms...`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      } else {
+        throw error;
+      }
+    }
+  }
+  throw new Error("Max retries exceeded");
+}
+
+// Key rotation helper
+async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Promise<T> {
+  const keysStr = process.env.GEMINI_API_KEY || "";
+  const apiKeys = keysStr.split(",").map(k => k.trim()).filter(k => k);
+
+  if (apiKeys.length === 0) {
+    throw new Error("No Gemini API keys provided.");
+  }
+
+  let lastError: unknown;
+
+  for (let i = 0; i < apiKeys.length; i++) {
+    try {
+      console.log(`[Gemini] Using API Key ${i + 1}/${apiKeys.length}`);
+      const genAI = new GoogleGenerativeAI(apiKeys[i]);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+      return await withRetry(() => action(model));
+    } catch (error: unknown) {
+      lastError = error;
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`[Gemini] Key ${i + 1} failed: ${message}`);
+    }
+  }
+
+  throw lastError;
+}
+
+// TEXT → Flashcards
+export async function generateFlashcardsFromText(text: string): Promise<GeneratedDeck> {
+  const prompt = `
+${SYSTEM_PROMPT}
+
+IMPORTANT:
+- Do NOT copy sentences directly from text
+- Rephrase into learning-focused questions
+- Ensure at least 20 flashcards
+- Include tricky and conceptual questions
+
+Content:
+${text.slice(0, 50000)}
+`;
+
+  const result = await executeWithKeyRotation<any>(model => model.generateContent(prompt));
+  const response = result.response.text();
+
+  const jsonMatch = response.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error("No valid JSON in AI response");
+
+  return JSON.parse(jsonMatch[0]) as GeneratedDeck;
+}
+
+// PDF → Flashcards (FIXED VERSION)
+export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<GeneratedDeck> {
+  const base64Data = pdfBuffer.toString("base64");
+
+  const result = await executeWithKeyRotation<any>(model =>
+    model.generateContent([
+      {
+        inlineData: {
+          mimeType: "application/pdf",
+          data: base64Data,
+        },
+      },
+      {
+        text: `${SYSTEM_PROMPT}
+
+IMPORTANT:
+- Extract full meaning from PDF
+- Do NOT summarize only
+- Generate diverse, deep-thinking flashcards
+- Include at least 20 flashcards
+`,
+      },
+    ])
+  );
+
+  const response = result.response.text();
+  const jsonMatch = response.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error("No valid JSON in AI response");
+
+  return JSON.parse(jsonMatch[0]) as GeneratedDeck;
+}
