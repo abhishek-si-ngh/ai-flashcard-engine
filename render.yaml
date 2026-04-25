@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: flashforge-engine
+    runtime: node
+    plan: free
+    buildCommand: npx prisma generate && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NEXTAUTH_URL
+        fromContext: op_url
+      - key: AUTH_URL
+        fromContext: op_url
+      - key: DATABASE_URL
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: AUTH_GOOGLE_ID
+        sync: false
+      - key: AUTH_GOOGLE_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
