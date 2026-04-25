@@ -9,9 +9,9 @@ services:
       - key: NODE_VERSION
         value: 20
       - key: NEXTAUTH_URL
-        fromContext: op_url
+        sync: false
       - key: AUTH_URL
-        fromContext: op_url
+        sync: false
       - key: DATABASE_URL
         sync: false
       - key: AUTH_SECRET
