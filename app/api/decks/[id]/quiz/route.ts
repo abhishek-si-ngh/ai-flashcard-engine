@@ -23,8 +23,16 @@ export async function GET(
       return NextResponse.json({ error: "Deck not found" }, { status: 404 });
     }
 
-    // Use PDF content if available, otherwise use cards as context
-    const context = deck.pdfContent || deck.cards.map(c => `${c.front}\n${c.back}`).join("\n\n");
+    // CLEAN INPUT: Extract core concepts and explanations
+    const extractConcepts = (cards: any[]) => {
+      return cards.map(c => ({
+        concept: c.front.replace(/^(what|how|why|explain|define|outline|list)/i, "").replace(/\?$/, "").trim(),
+        explanation: c.back
+      }));
+    };
+
+    const concepts = extractConcepts(deck.cards);
+    const context = JSON.stringify(concepts);
     
     // Try generating fresh questions via AI
     let quizCards;

@@ -195,25 +195,51 @@ export async function chatWithDocument(documentContent: string, query: string, h
 }
 
 // Dynamic AI Quiz Generation
-// Professional AI Quiz Generation
+// Professional AI Quiz Generation (EXAM MODE)
 export async function generateAIQuiz(context: string, count: number = 10): Promise<any[]> {
-  const prompt = `Act as a Professional Examiner. Create a ${count}-question Multiple Choice Quiz based on the provided content.
+  const prompt = `Act as a PROFESSIONAL EXAMINER.
 
-STRICT INSTRUCTIONS:
-1. REPHRASE CONCEPTS: Do NOT copy sentences from the source. Rewrite questions and options to test understanding, not memory of specific phrasing.
-2. GENUINE OPTIONS: Create 4 distinct, plausible options. They must be concise and professionally worded.
-3. QUALITY DISTRACTORS: Incorrect options must be conceptually related to the topic to challenge the user.
-4. FORMAT: Return ONLY a JSON array.
+You are given a list of concepts and explanations.
 
-Content:
-${context.slice(0, 40000)}
+Your task:
+- Create a ${count}-question quiz based on UNDERSTANDING of concepts
+- DO NOT copy or rephrase sentences directly
+- DO NOT use original wording
 
-Return format:
+INPUT DATA:
+${context}
+
+RULES:
+1. Questions must test CONCEPTUAL UNDERSTANDING
+2. Convert statements into analytical questions
+3. Avoid phrases like "What are...", "Explain...", etc.
+4. Use scenario-based or applied questions when possible
+
+OPTIONS RULES:
+- 4 options per question
+- All options must be plausible
+- Each option MUST be short (max 6–10 words)
+- NO full sentences
+- NO explanations inside options
+- Use keyword-style or phrase-style answers
+- All 4 options must be similar in length and format
+- Avoid copying phrases from the input content
+
+STRICT STYLE:
+- Questions: 1 sentence max
+- Options: short phrases only (not sentences)
+- Keep everything clean, exam-style
+
+ANSWER RULES:
+- Correct answer must be one of the options exactly
+
+OUTPUT:
+Return ONLY JSON:
 [
   {
-    "question": "Rephrased conceptual question",
-    "options": ["Rephrased Option 1", "Rephrased Option 2", "Rephrased Option 3", "Rephrased Option 4"],
-    "correctAnswer": "The exact correct option string"
+    "question": "conceptual or scenario-based question",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correctAnswer": "exact correct option"
   }
 ]`;
 
@@ -222,13 +248,12 @@ Return format:
       contents: [{ role: "user", parts: [{ text: prompt }] }],
       generationConfig: {
         responseMimeType: "application/json",
+        temperature: 0.7,
       }
     })
   );
   
   const response = result.response.text();
-  console.log("[Gemini] Quiz Raw Response:", response);
-  
   try {
     const data = JSON.parse(response);
     return Array.isArray(data) ? data : data.quiz || [];
@@ -237,4 +262,5 @@ Return format:
     if (!jsonMatch) throw new Error("No valid JSON array in AI response");
     return JSON.parse(jsonMatch[0]);
   }
+}
 }
