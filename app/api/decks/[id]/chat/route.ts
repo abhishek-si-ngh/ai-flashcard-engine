@@ -5,10 +5,12 @@ import { chatWithDocument } from "@/lib/gemini";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -19,7 +21,7 @@ export async function POST(
     }
 
     const deck = await prisma.deck.findUnique({
-      where: { id: params.id, userId: session.user.id },
+      where: { id: id, userId: session.user.id },
       select: { pdfContent: true },
     });
 

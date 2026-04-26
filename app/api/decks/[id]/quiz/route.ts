@@ -4,16 +4,17 @@ import { auth } from "@/auth";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const deck = await prisma.deck.findUnique({
-      where: { id: params.id, userId: session.user.id },
+      where: { id: id, userId: session.user.id },
       include: { cards: true },
     });
 
