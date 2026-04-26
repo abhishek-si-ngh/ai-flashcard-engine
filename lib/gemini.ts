@@ -99,15 +99,13 @@ async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Pr
     try {
       console.log(`[Gemini] Using API Key ${i + 1}/${apiKeys.length}`);
       const genAI = new GoogleGenerativeAI(apiKeys[i]);
-      const model = genAI.getGenerativeModel(
-        { model: "gemini-1.5-flash-latest" },
-        { apiVersion: "v1" }
-      );
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       return await withRetry(() => action(model));
-    } catch (error: unknown) {
+    } catch (error: any) {
       lastError = error;
-      const message = error instanceof Error ? error.message : String(error);
+      console.error(`[Gemini] Full Error Object:`, JSON.stringify(error, null, 2));
+      const message = error.message || String(error);
       console.error(`[Gemini] Key ${i + 1} failed: ${message}`);
     }
   }
