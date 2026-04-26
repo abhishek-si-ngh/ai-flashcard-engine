@@ -100,7 +100,6 @@ export default async function HomePage() {
                                   <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{deck._count.cards} Cards</div>
                                 </div>
                               </div>
-                              <span style={{ color: "var(--text-muted)" }}>→</span>
                             </Link>
                           ))}
                         </div>
