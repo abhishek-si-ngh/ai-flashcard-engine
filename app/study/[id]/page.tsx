@@ -26,10 +26,10 @@ const TYPE_ICONS: Record<string, string> = {
 };
 
 const RATINGS = [
-  { label: "Forgot", key: "1", rating: 0, cls: "forgot", emoji: "😰", desc: "Complete blank" },
-  { label: "Hard", key: "2", rating: 1, cls: "hard", emoji: "😓", desc: "Recalled with effort" },
-  { label: "Good", key: "3", rating: 2, cls: "good", emoji: "😊", desc: "Recalled correctly" },
-  { label: "Easy", key: "4", rating: 3, cls: "easy", emoji: "😎", desc: "Perfect recall" },
+  { label: "Forgot", rating: 0, cls: "forgot", emoji: "😰", desc: "Complete blank" },
+  { label: "Hard", rating: 1, cls: "hard", emoji: "😓", desc: "Recalled with effort" },
+  { label: "Good", rating: 2, cls: "good", emoji: "😊", desc: "Recalled correctly" },
+  { label: "Easy", rating: 3, cls: "easy", emoji: "😎", desc: "Perfect recall" },
 ];
 
 export default function StudyPage() {
@@ -79,10 +79,6 @@ export default function StudyPage() {
       if (e.key === " " || e.key === "Enter") {
         e.preventDefault();
         if (!flipped) setFlipped(true);
-      }
-      if (flipped && !rating) {
-        const r = RATINGS.find((r) => r.key === e.key);
-        if (r) handleRate(r.rating);
       }
     }
     window.addEventListener("keydown", onKey);
