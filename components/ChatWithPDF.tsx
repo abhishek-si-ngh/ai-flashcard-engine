@@ -102,7 +102,15 @@ export function ChatWithPDF({ deckId, title }: { deckId: string; title: string }
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
           placeholder="Ask a question..."
-          style={{ flex: 1, padding: "0.5rem", borderRadius: 8, border: "1px solid var(--border)", background: "var(--bg-surface)" }}
+          style={{ 
+            flex: 1, 
+            padding: "0.75rem", 
+            borderRadius: 8, 
+            border: "1px solid var(--border)", 
+            background: "var(--bg-elevated)",
+            color: "var(--text-primary)",
+            fontSize: "0.9rem"
+          }}
         />
         <button onClick={handleSend} disabled={loading} className="btn btn-primary btn-sm">Send</button>
       </div>
