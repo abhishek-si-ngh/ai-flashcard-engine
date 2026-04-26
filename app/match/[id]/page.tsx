@@ -41,8 +41,8 @@ export default function MatchGame() {
 
         // Calculate correct matches mapping (Left index -> Right index)
         const matches: Record<number, number> = {};
-        left.forEach((l, li) => {
-          matches[li] = rightShuffled.findIndex(r => r.id === l.id);
+        left.forEach((l: GameItem, li: number) => {
+          matches[li] = rightShuffled.findIndex((r: GameItem) => r.id === l.id);
         });
         setCorrectMatches(matches);
 
