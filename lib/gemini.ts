@@ -235,13 +235,32 @@ export async function generateAIQuiz(context: string, count: number = 10): Promi
     return JSON.parse(jsonMatch[0]);
   }
 }
-// Distill cards into keywords for Match Game (OPTIMIZED)
+// Distill cards into keywords for Match Game (EXPERT OPTIMIZED)
 export async function distillCardsForMatch(cards: { front: string, back: string }[]): Promise<{ id: string, front: string, back: string }[]> {
-  const prompt = `Distill these 5 flashcards into short keywords (max 3 words each).
-  Return JSON array of {front, back}.
-  
-  Cards:
-  ${JSON.stringify(cards)}`;
+  const prompt = `
+Convert flashcards into MATCHING GAME keywords.
+
+Rules:
+- Each side MUST be max 2–3 words
+- NO sentences
+- NO explanations
+- Use core concept terms only
+
+Examples:
+"Coronary Artery Disease"
+"Blood Flow Blockage"
+
+Return ONLY JSON:
+[
+  {
+    "front": "short keyword",
+    "back": "matching keyword"
+  }
+]
+
+Cards:
+${JSON.stringify(cards)}
+`;
 
   try {
     const result = await executeWithKeyRotation<any>(model => 
@@ -249,7 +268,7 @@ export async function distillCardsForMatch(cards: { front: string, back: string 
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         generationConfig: { 
           responseMimeType: "application/json",
-          temperature: 0.1, // Faster/more consistent
+          temperature: 0.1,
         }
       })
     );
@@ -258,15 +277,15 @@ export async function distillCardsForMatch(cards: { front: string, back: string 
     const distilled = JSON.parse(response);
     return distilled.map((d: any, i: number) => ({
       id: (cards[i] as any).id,
-      front: d.front || cards[i].front.split(" ").slice(0, 4).join(" "),
-      back: d.back || cards[i].back.split(" ").slice(0, 4).join(" ")
+      front: d.front || cards[i].front.split(" ").slice(0, 2).join(" "),
+      back: d.back || cards[i].back.split(" ").slice(0, 2).join(" ")
     }));
   } catch (e) {
     console.error("Distillation failed, using fallback:", e);
     return cards.map(c => ({ 
       id: (c as any).id, 
-      front: c.front.split(" ").slice(0, 4).join(" ") + "...",
-      back: c.back.split(" ").slice(0, 4).join(" ") + "..."
+      front: c.front.split(" ").slice(0, 2).join(" "),
+      back: c.back.split(" ").slice(0, 2).join(" ")
     }));
   }
 }
