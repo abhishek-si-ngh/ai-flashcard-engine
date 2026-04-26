@@ -175,7 +175,22 @@ ALSO: After the JSON, provide a section "---RAW_TEXT---" containing the full ext
 
   return { ...deck, rawText };
 }
+// Chat with Document
+export async function chatWithDocument(documentContent: string, query: string, history: { role: "user" | "model", parts: string[] }[] = []): Promise<string> {
+  const prompt = `You are an AI tutor helping a student understand this document.
+  
+  Document Content:
+  ${documentContent.slice(0, 40000)}
+  
+  User Query: ${query}
+  
+  Answer concisely and helpfully based ONLY on the document provided. If the answer is not in the document, say you don't know but offer general knowledge if relevant.`;
 
+  const result = await executeWithKeyRotation<any>(model => {
+    const chat = model.startChat({ history });
+    return chat.sendMessage(prompt);
+  });
+  
   return result.response.text();
 }
 
