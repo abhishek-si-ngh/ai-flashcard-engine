@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import pdf from "pdf-parse";
 
 export interface FlashCard {
   front: string;
@@ -161,6 +160,7 @@ ${text.slice(0, 50000)}
 
 // PDF → Flashcards (ROCK SOLID LOCAL EXTRACTION)
 export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<GeneratedDeck & { rawText: string }> {
+  const pdf = require("pdf-parse");
   console.log("[Gemini] Extracting text from PDF locally...");
   
   try {
