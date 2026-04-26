@@ -27,7 +27,10 @@ export default function MatchGame() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/decks/${id}/match`)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
+
+    fetch(`/api/decks/${id}/match`, { signal: controller.signal })
       .then((res) => res.json())
       .then((data) => {
         if (data.error) throw new Error(data.error);

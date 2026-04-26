@@ -235,33 +235,38 @@ export async function generateAIQuiz(context: string, count: number = 10): Promi
     return JSON.parse(jsonMatch[0]);
   }
 }
-// Distill cards into keywords for Match Game
+// Distill cards into keywords for Match Game (OPTIMIZED)
 export async function distillCardsForMatch(cards: { front: string, back: string }[]): Promise<{ id: string, front: string, back: string }[]> {
-  const prompt = `Convert these flashcards into VERY SHORT keywords (max 3-4 words each) for a matching game.
-  
-  Format: JSON array of objects with "front" and "back" keywords.
+  const prompt = `Distill these 5 flashcards into short keywords (max 3 words each).
+  Return JSON array of {front, back}.
   
   Cards:
-  ${JSON.stringify(cards)}
-  
-  Return ONLY JSON.`;
+  ${JSON.stringify(cards)}`;
 
-  const result = await executeWithKeyRotation<any>(model => 
-    model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { responseMimeType: "application/json" }
-    })
-  );
-  
-  const response = result.response.text();
   try {
+    const result = await executeWithKeyRotation<any>(model => 
+      model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { 
+          responseMimeType: "application/json",
+          temperature: 0.1, // Faster/more consistent
+        }
+      })
+    );
+    
+    const response = result.response.text();
     const distilled = JSON.parse(response);
     return distilled.map((d: any, i: number) => ({
       id: (cards[i] as any).id,
-      front: d.front,
-      back: d.back
+      front: d.front || cards[i].front.split(" ").slice(0, 4).join(" "),
+      back: d.back || cards[i].back.split(" ").slice(0, 4).join(" ")
     }));
   } catch (e) {
-    return cards.map(c => ({ ...c, id: (c as any).id })); // Fallback to original
+    console.error("Distillation failed, using fallback:", e);
+    return cards.map(c => ({ 
+      id: (c as any).id, 
+      front: c.front.split(" ").slice(0, 4).join(" ") + "...",
+      back: c.back.split(" ").slice(0, 4).join(" ") + "..."
+    }));
   }
 }
