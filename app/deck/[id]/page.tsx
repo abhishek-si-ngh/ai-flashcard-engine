@@ -117,6 +117,16 @@ export default function DeckPage() {
               <Link href={`/quiz/${id}`} className="btn btn-secondary">
                 🎯 Quiz Mode
               </Link>
+              <button 
+                onClick={() => {
+                  const chatBtn = document.getElementById('chat-trigger');
+                  if (chatBtn) chatBtn.click();
+                }} 
+                className="btn btn-ghost" 
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+              >
+                💬 Chat with Tutor
+              </button>
               {deleteConfirm ? (
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <button onClick={handleDelete} className="btn btn-danger btn-sm">Confirm Delete</button>

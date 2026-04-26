@@ -49,6 +49,7 @@ export function ChatWithPDF({ deckId, title }: { deckId: string; title: string }
   if (!isOpen) {
     return (
       <button 
+        id="chat-trigger"
         onClick={() => setIsOpen(true)}
         className="btn btn-secondary"
         style={{ position: "fixed", bottom: 24, right: 24, borderRadius: "50%", width: 60, height: 60, fontSize: "1.5rem", boxShadow: "0 10px 25px rgba(0,0,0,0.2)", zIndex: 100 }}
