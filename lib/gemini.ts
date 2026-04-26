@@ -164,39 +164,56 @@ ${text.slice(0, 50000)}
   return JSON.parse(jsonMatch[0]) as GeneratedDeck;
 }
 
-// PDF → Flashcards (ROCK SOLID LOCAL EXTRACTION)
+// PDF → Flashcards (UNIVERSAL STABLE VERSION)
 export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<GeneratedDeck & { rawText: string }> {
-  console.log("[Gemini] Starting local PDF extraction...");
+  console.log("[Gemini] Starting universal PDF processing...");
   
+  // 1. TRY LOCAL EXTRACTION FIRST (Most stable for text)
   try {
-    // Extra defensive require for production bundlers
     const pdfLib = require("pdf-parse");
-    const pdfReader = typeof pdfLib === "function" ? pdfLib : pdfLib.default;
+    // Check every possible export location
+    const pdfReader = (typeof pdfLib === "function") ? pdfLib : (pdfLib.default || pdfLib.pdfParse || Object.values(pdfLib).find(v => typeof v === "function"));
     
-    if (typeof pdfReader !== "function") {
-      console.error("[PDF] Resolved reader is not a function:", typeof pdfReader);
-      throw new Error("PDF Library failed to load correctly in this environment.");
+    if (typeof pdfReader === "function") {
+      const data = await pdfReader(pdfBuffer);
+      const text = data?.text;
+      if (text && text.trim().length > 50) {
+        console.log(`[Gemini] Local extraction successful (${text.length} chars).`);
+        const generated = await generateFlashcardsFromText(text);
+        return { ...generated, rawText: text };
+      }
     }
+    console.warn("[Gemini] Local extraction failed or returned no text. Falling back to AI Multimodal...");
+  } catch (err) {
+    console.warn("[Gemini] Local PDF reader failed to load. Trying AI Multimodal fallback...");
+  }
 
-    const data = await pdfReader(pdfBuffer);
-    const text = data?.text;
+  // 2. FALLBACK TO AI MULTIMODAL (Gemini's native PDF support)
+  try {
+    const base64Data = pdfBuffer.toString("base64");
+    const prompt = `${SYSTEM_PROMPT}\n\nIMPORTANT: Extract all key info and return JSON. Also include a section ---RAW_TEXT--- with the full text.`;
 
-    if (!text || text.trim().length < 20) {
-      throw new Error("The PDF appears to be empty or contains only images (scanned document).");
-    }
+    const result = await executeWithKeyRotation<any>(model =>
+      model.generateContent({
+        contents: [{
+          role: "user",
+          parts: [
+            { inlineData: { mimeType: "application/pdf", data: base64Data } },
+            { text: prompt }
+          ]
+        }]
+      })
+    );
 
-    console.log(`[Gemini] Extracted ${text.length} characters successfully.`);
-    
-    const generated = await generateFlashcardsFromText(text);
-    
-    return {
-      ...generated,
-      rawText: text
-    };
+    const response = result.response.text();
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    const deck = JSON.parse(jsonMatch?.[0] || "{}");
+    const rawText = response.split("---RAW_TEXT---")[1] || "Text extracted via AI.";
+
+    return { ...deck, rawText };
   } catch (error: any) {
-    console.error("[PDF Extraction Error]:", error);
-    // Provide the actual error message to the user for better debugging
-    throw new Error(`PDF Error: ${error.message || "Failed to parse file structure"}`);
+    console.error("[Gemini] All PDF methods failed:", error);
+    throw new Error(`Critical PDF Error: ${error.message || "Could not process file"}`);
   }
 }
 // Chat with Document
