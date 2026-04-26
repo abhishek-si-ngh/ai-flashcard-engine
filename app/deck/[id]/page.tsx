@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
+import { ChatWithPDF } from "@/components/ChatWithPDF";
 
 interface Card {
   id: string;
@@ -29,7 +30,7 @@ interface Deck {
 }
 
 const TYPE_ICONS: Record<string, string> = {
-  concept: "🧩", definition: "📖", example: "🔢", edge_case: "⚠️"
+  concept: "🧩", definition: "📖", example: "🔢", edge_case: "⚠️", cloze: "✏️"
 };
 
 export default function DeckPage() {
@@ -110,8 +111,14 @@ export default function DeckPage() {
               {deck.description && <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", maxWidth: 600 }}>{deck.description}</p>}
             </div>
             <div style={{ display: "flex", gap: "0.75rem", flexShrink: 0, flexWrap: "wrap" }}>
-              <Link href={`/study/${id}`} className="btn btn-primary btn-lg">
-                ▶ Study Now {stats.dueCount > 0 && <span className="badge badge-learning" style={{ marginLeft: 4 }}>{stats.dueCount}</span>}
+              <Link href={`/study/${id}`} className="btn btn-primary">
+                ▶ Study SM-2 {stats.dueCount > 0 && <span className="badge badge-learning" style={{ marginLeft: 4 }}>{stats.dueCount}</span>}
+              </Link>
+              <Link href={`/quiz/${id}`} className="btn btn-secondary">
+                🎯 Quiz Mode
+              </Link>
+              <Link href={`/match/${id}`} className="btn btn-ghost">
+                🧩 Match Game
               </Link>
               {deleteConfirm ? (
                 <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -218,6 +225,7 @@ export default function DeckPage() {
             })}
           </div>
         </div>
+        <ChatWithPDF deckId={deck.id} title={deck.title} />
       </main>
     </div>
   );

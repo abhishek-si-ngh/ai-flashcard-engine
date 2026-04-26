@@ -19,6 +19,14 @@ model User {
   sessions      Session[]
   decks         Deck[]          // Relation to user's decks
   studySessions StudySession[]  // Relation to user's study sessions
+  
+  // Progress tracking & Gamification
+  streak        Int             @default(0)
+  bestStreak    Int             @default(0)
+  lastStudyDate DateTime?
+  xp            Int             @default(0)
+  level         Int             @default(1)
+
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
 }
@@ -70,6 +78,10 @@ model Deck {
   subject     String?
   color       String   @default("#6366f1")
   emoji       String   @default("📚")
+  
+  // PDF content for "Chat with PDF"
+  pdfContent  String?  @db.Text
+  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   cards       Card[]
@@ -85,8 +97,13 @@ model Card {
   front       String
   back        String
   hint        String?
-  type        String   @default("concept")
+  type        String   @default("concept") // concept, cloze, image
 
+  // New fields for types
+  clozeContent String? @db.Text
+  imageUrl     String?
+  choices      String? // JSON string for MCQs if pre-generated
+  
   // SM-2 spaced repetition fields
   repetitions Int      @default(0)
   easeFactor  Float    @default(2.5)
@@ -109,10 +126,15 @@ model StudySession {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   deckId       String
   deck         Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  
+  type         String   @default("study") // study, quiz, match
   cardsStudied Int      @default(0)
   correctCount Int      @default(0)
   duration     Int      @default(0) // in seconds
+  xpEarned     Int      @default(0)
+  
   completedAt  DateTime @default(now())
   
   @@index([userId])
 }
+

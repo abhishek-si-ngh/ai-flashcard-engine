@@ -4,7 +4,8 @@ export interface FlashCard {
   front: string;
   back: string;
   hint?: string;
-  type: "concept" | "definition" | "example" | "edge_case";
+  type: "concept" | "definition" | "example" | "edge_case" | "cloze";
+  clozeContent?: string;
 }
 
 export interface GeneratedDeck {
@@ -17,14 +18,14 @@ export interface GeneratedDeck {
 
 const SYSTEM_PROMPT = `You are an expert teacher and cognitive scientist specializing in active recall and spaced repetition learning.
 
-Your task is to generate HIGH-QUALITY flashcards that test deep understanding, not memorization.
+Your task is to generate HIGH-QUALITY flashcards that test deep understanding.
 
 Flashcard requirements:
 1. Cover KEY CONCEPTS clearly
 2. Include DEFINITIONS of important terms
 3. Add REAL-WORLD or WORKED EXAMPLES
 4. Include EDGE CASES and tricky scenarios
-5. Test RELATIONSHIPS between ideas
+5. Include CLOZE (fill-in-the-blank) deletions for key facts
 
 Quality rules:
 - Questions must provoke thinking (avoid simple copy-paste)
@@ -32,16 +33,12 @@ Quality rules:
 - Focus on important concepts, cause-effect, and applications
 - Highlight common mistakes students make
 
-Answer rules:
-- Concise (2–4 lines)
-- Structured (use bullet points if helpful)
-- Include examples where useful
-
 Card types:
 - "concept" → understanding-based
 - "definition" → key terms
 - "example" → applied questions
 - "edge_case" → tricky or uncommon scenarios
+- "cloze" → fill-in-the-blank style. For cloze, "front" should be the sentence with [...] and "back" should be the missing word(s). Also provide "clozeContent" which is the full sentence.
 
 Generation rules:
 - Generate 20–40 flashcards depending on content length
@@ -59,7 +56,8 @@ Return ONLY valid JSON in this format:
       "front": "question here",
       "back": "answer here",
       "hint": "optional hint",
-      "type": "concept"
+      "type": "concept",
+      "clozeContent": "full sentence for cloze"
     }
   ]
 }`;
@@ -138,7 +136,7 @@ ${text.slice(0, 50000)}
 }
 
 // PDF → Flashcards (FIXED VERSION)
-export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<GeneratedDeck> {
+export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<GeneratedDeck & { rawText: string }> {
   const base64Data = pdfBuffer.toString("base64");
 
   const result = await executeWithKeyRotation<any>(model =>
@@ -157,14 +155,42 @@ IMPORTANT:
 - Do NOT summarize only
 - Generate diverse, deep-thinking flashcards
 - Include at least 20 flashcards
+
+ALSO: After the JSON, provide a section "---RAW_TEXT---" containing the full extracted text from the PDF so I can store it for later chat.
 `,
       },
     ])
   );
 
   const response = result.response.text();
+  
   const jsonMatch = response.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error("No valid JSON in AI response");
 
-  return JSON.parse(jsonMatch[0]) as GeneratedDeck;
+  const deck = JSON.parse(jsonMatch[0]) as GeneratedDeck;
+  
+  const rawTextMatch = response.split("---RAW_TEXT---")[1];
+  const rawText = rawTextMatch ? rawTextMatch.trim() : "Text extraction failed.";
+
+  return { ...deck, rawText };
 }
+
+// Chat with Document
+export async function chatWithDocument(documentContent: string, query: string, history: { role: "user" | "model", parts: string[] }[] = []): Promise<string> {
+  const prompt = `You are an AI tutor helping a student understand this document.
+  
+  Document Content:
+  ${documentContent.slice(0, 40000)}
+  
+  User Query: ${query}
+  
+  Answer concisely and helpfully based ONLY on the document provided. If the answer is not in the document, say you don't know but offer general knowledge if relevant.`;
+
+  const result = await executeWithKeyRotation<any>(model => {
+    const chat = model.startChat({ history });
+    return chat.sendMessage(prompt);
+  });
+  
+  return result.response.text();
+}
+

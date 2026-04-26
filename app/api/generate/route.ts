@@ -42,17 +42,20 @@ export async function POST(req: NextRequest) {
         subject: generated.subject,
         emoji: generated.emoji || "📚",
         color,
+        pdfContent: generated.rawText,
         cards: {
           create: generated.cards.map((card) => ({
             front: card.front,
             back: card.back,
             hint: card.hint || null,
             type: card.type || "concept",
+            clozeContent: card.clozeContent || null,
           })),
         },
       },
       include: { cards: true },
     });
+
 
     return NextResponse.json({ deck }, { status: 201 });
   } catch (err) {
