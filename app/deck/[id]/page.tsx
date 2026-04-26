@@ -117,9 +117,6 @@ export default function DeckPage() {
               <Link href={`/quiz/${id}`} className="btn btn-secondary">
                 🎯 Quiz Mode
               </Link>
-              <Link href={`/match/${id}`} className="btn btn-ghost">
-                🧩 Match Game
-              </Link>
               {deleteConfirm ? (
                 <div style={{ display: "flex", gap: "0.5rem" }}>
                   <button onClick={handleDelete} className="btn btn-danger btn-sm">Confirm Delete</button>
