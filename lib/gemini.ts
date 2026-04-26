@@ -246,12 +246,25 @@ Return ONLY valid JSON:
 ]
 `;
 
-  const result = await executeWithKeyRotation<any>(model => model.generateContent(prompt));
-  const response = result.response.text();
+  const result = await executeWithKeyRotation<any>(model => 
+    model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+      }
+    })
+  );
   
-  const jsonMatch = response.match(/\[[\s\S]*\]/);
-  if (!jsonMatch) throw new Error("No valid JSON array in AI response");
-
-  return JSON.parse(jsonMatch[0]);
+  const response = result.response.text();
+  console.log("[Gemini] Quiz Raw Response:", response);
+  
+  try {
+    const data = JSON.parse(response);
+    return Array.isArray(data) ? data : data.quiz || [];
+  } catch (e) {
+    const jsonMatch = response.match(/\[[\s\S]*\]/);
+    if (!jsonMatch) throw new Error("No valid JSON array in AI response");
+    return JSON.parse(jsonMatch[0]);
+  }
 }
 
