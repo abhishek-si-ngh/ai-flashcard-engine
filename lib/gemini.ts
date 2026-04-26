@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import pdf from "pdf-parse";
 
 export interface FlashCard {
   front: string;
@@ -158,51 +159,30 @@ ${text.slice(0, 50000)}
   return JSON.parse(jsonMatch[0]) as GeneratedDeck;
 }
 
-// PDF → Flashcards (ULTRA STABLE VERSION)
+// PDF → Flashcards (ROCK SOLID LOCAL EXTRACTION)
 export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<GeneratedDeck & { rawText: string }> {
-  const base64Data = pdfBuffer.toString("base64");
-
-  const prompt = `${SYSTEM_PROMPT}
-
-IMPORTANT:
-- Extract all key information from the PDF
-- Create at least 20-30 flashcards
-- REPHRASE into analytical questions
-- Return valid JSON for the deck structure
-
-ALSO: After the JSON, provide a section "---RAW_TEXT---" containing the full extracted text from the PDF so I can store it for later chat.
-`;
-
-  const result = await executeWithKeyRotation<any>(model =>
-    model.generateContent({
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              inlineData: {
-                mimeType: "application/pdf",
-                data: base64Data,
-              },
-            },
-            { text: prompt }
-          ]
-        }
-      ]
-    })
-  );
-
-  const response = result.response.text();
+  console.log("[Gemini] Extracting text from PDF locally...");
   
-  const jsonMatch = response.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("No valid JSON in AI response");
+  try {
+    const data = await pdf(pdfBuffer);
+    const text = data.text;
 
-  const deck = JSON.parse(jsonMatch[0]) as GeneratedDeck;
-  
-  const rawTextMatch = response.split("---RAW_TEXT---")[1];
-  const rawText = rawTextMatch ? rawTextMatch.trim() : "Text extraction failed.";
+    if (!text || text.trim().length < 50) {
+      throw new Error("The PDF seems to have very little text. It might be a scanned image or empty.");
+    }
 
-  return { ...deck, rawText };
+    console.log(`[Gemini] Extracted ${text.length} characters. Sending to AI...`);
+    
+    const generated = await generateFlashcardsFromText(text);
+    
+    return {
+      ...generated,
+      rawText: text
+    };
+  } catch (error: any) {
+    console.error("[PDF Parse Error]:", error);
+    throw new Error("Failed to read the PDF file. Please ensure it is not password protected.");
+  }
 }
 // Chat with Document
 export async function chatWithDocument(documentContent: string, query: string, history: { role: "user" | "model", parts: string[] }[] = []): Promise<string> {
