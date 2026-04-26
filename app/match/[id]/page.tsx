@@ -56,8 +56,8 @@ export default function MatchGame() {
         const allOptions = [correctSet];
         while (allOptions.length < 4) {
           // Generate a random permutation for a realistic fake set
-          const indices = left.map((_, i) => i).sort(() => Math.random() - 0.5);
-          const fakeSet = left.map((_, i) => `${i + 1}-${String.fromCharCode(97 + indices[i])}`);
+          const indices = left.map((_: GameItem, i: number) => i).sort(() => Math.random() - 0.5);
+          const fakeSet = left.map((_: GameItem, i: number) => `${i + 1}-${String.fromCharCode(97 + indices[i])}`);
           
           if (!allOptions.some((opt: string[]) => opt.join(",") === fakeSet.join(","))) {
             allOptions.push(fakeSet);
