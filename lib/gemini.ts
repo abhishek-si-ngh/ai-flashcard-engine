@@ -84,13 +84,13 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 2): Promise<T> {
   throw new Error("Max retries exceeded");
 }
 
-// Key rotation helper with Multi-Model Fallback
+// Key rotation helper with Bulletproof Fallback
 async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Promise<T> {
   const keysStr = process.env.GEMINI_API_KEY || "";
   const apiKeys = keysStr.split(",").map(k => k.trim()).filter(k => k);
   
-  // List of models to try in order of preference
-  const MODELS_TO_TRY = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.0-flash-exp"];
+  // Try stable 1.5 first, then 8b, then the original Pro
+  const MODELS_TO_TRY = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
 
   if (apiKeys.length === 0) {
     throw new Error("No Gemini API keys provided.");
@@ -103,21 +103,25 @@ async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Pr
     
     for (const modelId of MODELS_TO_TRY) {
       try {
-        console.log(`[Gemini] Trying Key ${i + 1} with Model ${modelId}`);
-        const model = genAI.getGenerativeModel({ model: modelId });
+        console.log(`[Gemini] Trying Key ${i + 1} with Model ${modelId} (v1)`);
+        
+        // Force Stable v1 and use explicit models/ prefix
+        const model = genAI.getGenerativeModel(
+          { model: `models/${modelId}` },
+          { apiVersion: "v1" }
+        );
+        
         return await withRetry(() => action(model));
       } catch (error: any) {
         lastError = error;
         const message = error.message || String(error);
         
-        // If it's a 404 (Model Not Found), try the next model ID
         if (message.includes("404") || message.includes("not found")) {
-          console.warn(`[Gemini] Model ${modelId} not found for key ${i+1}. Trying next variant...`);
+          console.warn(`[Gemini] Variant ${modelId} not found on v1. Trying next...`);
           continue;
         }
         
-        // For other errors (like 429 limits), fail this key and move to next key
-        console.error(`[Gemini] Key ${i + 1} failed with model ${modelId}: ${message}`);
+        console.error(`[Gemini] Key ${i + 1} failed: ${message}`);
         break; 
       }
     }
