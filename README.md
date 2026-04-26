@@ -1,41 +1,56 @@
-# ⚡ FlashForge AI: The Smart Flashcard Engine
+# ⚡ FlashForge AI: The Ultimate Smart Flashcard Engine
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://flashforge-engine.onrender.com)
-[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-ORM-blue)](https://www.prisma.io/)
-[![Gemini AI](https://img.shields.io/badge/AI-Gemini%201.5-orange)](https://deepmind.google/technologies/gemini/)
+[![Gemini AI](https://img.shields.io/badge/AI-Gemini%202.0-orange)](https://deepmind.google/technologies/gemini/)
 
-FlashForge is an AI-native study platform that transforms messy PDF documents into structured, teacher-quality flashcard decks. Built with cognitive science at its core, it uses the **SM-2 Spaced Repetition Algorithm** to optimize long-term retention and mastery.
+FlashForge is an AI-native study platform that transforms messy PDF documents into structured, teacher-quality flashcard decks. Built with cognitive science and gamification at its core, it uses the **SM-2 Spaced Repetition Algorithm** alongside competitive features to make learning addictive and effective.
 
 ---
 
 ## ✨ Key Features
 
-*   **📄 AI PDF Ingestion**: Native PDF processing using Google Gemini 1.5 Flash. It identifies core concepts, definitions, worked examples, and common edge cases.
-*   **🧠 SM-2 Spaced Repetition**: A custom implementation of the SuperMemo-2 algorithm that schedules card reviews based on your individual performance.
-*   **🎭 3D Immersive Study**: A beautiful, 3D-animated study interface designed to maximize focus and minimize fatigue.
-*   **🌗 Adaptive UI**: Premium dark/light mode toggle with theme persistence.
-*   **📊 Mastery Analytics**: Detailed progress tracking with mastery rings and accuracy trends.
-*   **🔐 Secure Auth**: Google OAuth integration ensures your study decks and progress are private and secure.
+### 🧠 Advanced Learning Engine
+*   **📄 AI PDF Ingestion**: Native PDF processing using Google Gemini 2.0 Flash. It extracts core concepts, definitions, worked examples, and **Cloze deletions**.
+*   **🤖 Chat with PDF**: Ask questions directly to your documents. Our AI tutor clarifies complex concepts using the source text as context.
+*   **🔁 SM-2 Spaced Repetition**: A custom implementation of the SuperMemo-2 algorithm that schedules card reviews based on your individual performance.
+
+### 🎮 Gamification & Engagement
+*   **🔥 Streak System**: Stay consistent with daily study streaks and personal records.
+*   **🏆 Global Leaderboard**: Compete with students worldwide. Earn XP for every correct answer and climb the ranks.
+*   **⭐ Leveling System**: Earn experience points (XP) to level up your profile as you master more material.
+*   **🎯 Quiz & Match Modes**: 
+    *   **Quiz Mode**: AI-generated Multiple Choice Questions (MCQs) for active testing.
+    *   **Match Game**: A high-speed game to match terms and definitions against the clock.
+
+### 📊 Insights & Analytics
+*   **📊 Mastery Dashboard**: A central hub to track accuracy, cards mastered, and total XP.
+*   **🧠 Weak Topic Detection**: Statistical analysis identifies exactly which decks or topics you struggle with, allowing for targeted study sessions.
+*   **📈 Progress Visualization**: Detailed charts and mastery bars for every deck.
+
+### 🎨 Premium Experience
+*   **🎭 3D Immersive Study**: A beautiful, 3D-animated study interface designed to maximize focus.
+*   **🌗 Adaptive UI**: Premium dark/light mode with glassmorphism aesthetics.
+*   **🔐 Secure Auth**: Google OAuth integration keeps your study data private.
 
 ---
 
 ## 🛠️ Tech Stack
 
-*   **Framework**: Next.js 15 (App Router)
-*   **AI Engine**: Google Gemini 1.5 Flash
+*   **Framework**: Next.js 16 (App Router)
+*   **AI Engine**: Google Gemini 2.0 Flash
 *   **Database**: PostgreSQL (Railway)
-*   **ORM**: Prisma
+*   **ORM**: Prisma 7
 *   **Authentication**: Auth.js v5 (NextAuth)
 *   **Styling**: Vanilla CSS (Modern CSS Variables & Glassmorphism)
-*   **Deployment**: Render (Frontend) & Railway (Database)
 
 ---
 
 ## 🚀 Getting Started
 
 ### 1. Prerequisites
-*   Node.js 20+
+*   Node.js 22+
 *   A Google Cloud Project (for Gemini & OAuth)
 *   A PostgreSQL Database (e.g., Railway)
 
@@ -54,6 +69,9 @@ AUTH_GOOGLE_SECRET="your-google-client-secret"
 ```bash
 # Install dependencies
 npm install
+
+# Initialize Prisma 7 config
+# Ensure prisma.config.ts exists and url is removed from schema.prisma
 
 # Generate Prisma client
 npx prisma generate
@@ -76,7 +94,7 @@ FlashForge uses the **SM-2 Algorithm** to calculate when you should next see a c
 -   **3 (Good)**: Solid understanding.
 -   **4 (Easy)**: Move far into the future.
 
-The system then updates the card's `easiness factor` and `interval` to ensure you are always studying at the edge of your forgetting curve.
+The system updates the card's `easiness factor` and `interval` to ensure you are always studying at the edge of your forgetting curve.
 
 ---
 
