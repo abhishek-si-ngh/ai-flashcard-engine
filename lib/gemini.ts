@@ -176,22 +176,40 @@ ALSO: After the JSON, provide a section "---RAW_TEXT---" containing the full ext
   return { ...deck, rawText };
 }
 
-// Chat with Document
-export async function chatWithDocument(documentContent: string, query: string, history: { role: "user" | "model", parts: string[] }[] = []): Promise<string> {
-  const prompt = `You are an AI tutor helping a student understand this document.
-  
-  Document Content:
-  ${documentContent.slice(0, 40000)}
-  
-  User Query: ${query}
-  
-  Answer concisely and helpfully based ONLY on the document provided. If the answer is not in the document, say you don't know but offer general knowledge if relevant.`;
-
-  const result = await executeWithKeyRotation<any>(model => {
-    const chat = model.startChat({ history });
-    return chat.sendMessage(prompt);
-  });
-  
   return result.response.text();
+}
+
+// Dynamic AI Quiz Generation
+export async function generateAIQuiz(context: string, count: number = 10): Promise<any[]> {
+  const prompt = `You are an AI examiner. Create a ${count}-question MCQ quiz based on the following content.
+  
+  Content:
+  ${context.slice(0, 40000)}
+  
+  Requirements:
+  1. Generate exactly ${count} questions.
+  2. Each question must have exactly 4 diverse options (A, B, C, D).
+  3. Correct answer MUST be one of the options.
+  4. Answers must be CONCISE (max 12 words).
+  5. Questions should test understanding, NOT just rote memorization.
+  6. DO NOT use the same exact wording as the source material. Rephrase EVERYTHING.
+  7. Return ONLY a valid JSON array of objects.
+  
+  Format:
+  [
+    {
+      "question": "rephrased analytical question",
+      "options": ["Concise Option 1", "Concise Option 2", "Concise Option 3", "Concise Option 4"],
+      "correctAnswer": "the exact string of the correct option"
+    }
+  ]`;
+
+  const result = await executeWithKeyRotation<any>(model => model.generateContent(prompt));
+  const response = result.response.text();
+  
+  const jsonMatch = response.match(/\[[\s\S]*\]/);
+  if (!jsonMatch) throw new Error("No valid JSON array in AI response");
+
+  return JSON.parse(jsonMatch[0]);
 }
 
