@@ -248,16 +248,10 @@ export default function StudyPage() {
       {/* Card area */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "2rem 1rem" }}>
 
-        {/* Card type badge */}
         <div style={{ marginBottom: "1rem", display: "flex", gap: "0.5rem", alignItems: "center" }}>
           <span className={`badge badge-${card.type}`}>
             {TYPE_ICONS[card.type] || "🧩"} {card.type.replace("_", " ")}
           </span>
-          {!flipped && (
-            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
-              Press <kbd style={{ padding: "1px 6px", background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: 4, fontFamily: "monospace" }}>Space</kbd> to flip
-            </span>
-          )}
         </div>
 
         {/* 3D Flashcard */}
@@ -282,11 +276,6 @@ export default function StudyPage() {
               {showHint && card.hint && (
                 <div className="flashcard-hint">💡 {card.hint}</div>
               )}
-              {!flipped && (
-                <div style={{ position: "absolute", bottom: "1rem", right: "1rem", fontSize: "0.7rem", color: "var(--text-muted)" }}>
-                  Click to reveal →
-                </div>
-              )}
             </div>
 
             {/* Back */}
@@ -310,7 +299,6 @@ export default function StudyPage() {
               >
                 <span style={{ fontSize: "1.25rem", display: "block", marginBottom: "2px" }}>{r.emoji}</span>
                 <span className="rating-label">{r.label}</span>
-                <span className="rating-key">Press {r.key}</span>
               </button>
             ))}
           </div>
@@ -327,12 +315,6 @@ export default function StudyPage() {
           </button>
         )}
 
-        {/* Keyboard guide */}
-        <div style={{ marginTop: "2rem", fontSize: "0.72rem", color: "var(--text-muted)", textAlign: "center" }}>
-          {flipped
-            ? "Rate: 1 = Forgot · 2 = Hard · 3 = Good · 4 = Easy"
-            : "Space or Enter to flip · Click the card"}
-        </div>
       </div>
     </div>
   );
