@@ -1,5 +1,11 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// Fix for 'DOMMatrix is not defined' error in server-side PDF parsing
+if (typeof global !== "undefined" && !global.DOMMatrix) {
+  // @ts-ignore
+  global.DOMMatrix = class DOMMatrix {};
+}
+
 export interface FlashCard {
   front: string;
   back: string;
@@ -89,8 +95,8 @@ async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Pr
   const keysStr = process.env.GEMINI_API_KEY || "";
   const apiKeys = keysStr.split(",").map(k => k.trim()).filter(k => k);
   
-  // Try stable 1.5 first, then 8b, then the original Pro
-  const MODELS_TO_TRY = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-pro"];
+  // Using specific stable versions as recommended
+  const MODELS_TO_TRY = ["gemini-1.5-flash-latest", "gemini-1.5-flash-001"];
 
   if (apiKeys.length === 0) {
     throw new Error("No Gemini API keys provided.");
@@ -103,11 +109,11 @@ async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Pr
     
     for (const modelId of MODELS_TO_TRY) {
       try {
-        console.log(`[Gemini] Trying Key ${i + 1} with Model ${modelId} (v1)`);
+        console.log(`[Gemini] Trying Key ${i + 1} with Model ${modelId}`);
         
-        // Force Stable v1 and use explicit models/ prefix
+        // Removed 'models/' prefix and used stable v1
         const model = genAI.getGenerativeModel(
-          { model: `models/${modelId}` },
+          { model: modelId },
           { apiVersion: "v1" }
         );
         
