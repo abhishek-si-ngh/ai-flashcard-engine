@@ -235,4 +235,3 @@ export async function generateAIQuiz(context: string, count: number = 10): Promi
     return JSON.parse(jsonMatch[0]);
   }
 }
-}
