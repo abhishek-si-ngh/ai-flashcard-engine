@@ -195,24 +195,27 @@ export async function chatWithDocument(documentContent: string, query: string, h
 }
 
 // Dynamic AI Quiz Generation
+// Professional AI Quiz Generation
 export async function generateAIQuiz(context: string, count: number = 10): Promise<any[]> {
-  const prompt = `Create a ${count}-question MCQ quiz based on the following content.
-  
-  Content:
-  ${context.slice(0, 40000)}
-  
-  Requirements:
-  1. Generate exactly ${count} questions.
-  2. Each question must have 4 plausible options.
-  
-  Return ONLY a valid JSON array of objects:
-  [
-    {
-      "question": "clear question",
-      "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-      "correctAnswer": "exact correct option string"
-    }
-  ]`;
+  const prompt = `Act as a Professional Examiner. Create a ${count}-question Multiple Choice Quiz based on the provided content.
+
+STRICT INSTRUCTIONS:
+1. REPHRASE CONCEPTS: Do NOT copy sentences from the source. Rewrite questions and options to test understanding, not memory of specific phrasing.
+2. GENUINE OPTIONS: Create 4 distinct, plausible options. They must be concise and professionally worded.
+3. QUALITY DISTRACTORS: Incorrect options must be conceptually related to the topic to challenge the user.
+4. FORMAT: Return ONLY a JSON array.
+
+Content:
+${context.slice(0, 40000)}
+
+Return format:
+[
+  {
+    "question": "Rephrased conceptual question",
+    "options": ["Rephrased Option 1", "Rephrased Option 2", "Rephrased Option 3", "Rephrased Option 4"],
+    "correctAnswer": "The exact correct option string"
+  }
+]`;
 
   const result = await executeWithKeyRotation<any>(model => 
     model.generateContent({
