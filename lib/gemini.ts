@@ -84,29 +84,42 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 2): Promise<T> {
   throw new Error("Max retries exceeded");
 }
 
-// Key rotation helper
+// Key rotation helper with Multi-Model Fallback
 async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Promise<T> {
   const keysStr = process.env.GEMINI_API_KEY || "";
   const apiKeys = keysStr.split(",").map(k => k.trim()).filter(k => k);
+  
+  // List of models to try in order of preference
+  const MODELS_TO_TRY = ["gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-2.0-flash-exp"];
 
   if (apiKeys.length === 0) {
     throw new Error("No Gemini API keys provided.");
   }
 
-  let lastError: unknown;
+  let lastError: any;
 
   for (let i = 0; i < apiKeys.length; i++) {
-    try {
-      console.log(`[Gemini] Using API Key ${i + 1}/${apiKeys.length}`);
-      const genAI = new GoogleGenerativeAI(apiKeys[i]);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-      return await withRetry(() => action(model));
-    } catch (error: any) {
-      lastError = error;
-      console.error(`[Gemini] Full Error Object:`, JSON.stringify(error, null, 2));
-      const message = error.message || String(error);
-      console.error(`[Gemini] Key ${i + 1} failed: ${message}`);
+    const genAI = new GoogleGenerativeAI(apiKeys[i]);
+    
+    for (const modelId of MODELS_TO_TRY) {
+      try {
+        console.log(`[Gemini] Trying Key ${i + 1} with Model ${modelId}`);
+        const model = genAI.getGenerativeModel({ model: modelId });
+        return await withRetry(() => action(model));
+      } catch (error: any) {
+        lastError = error;
+        const message = error.message || String(error);
+        
+        // If it's a 404 (Model Not Found), try the next model ID
+        if (message.includes("404") || message.includes("not found")) {
+          console.warn(`[Gemini] Model ${modelId} not found for key ${i+1}. Trying next variant...`);
+          continue;
+        }
+        
+        // For other errors (like 429 limits), fail this key and move to next key
+        console.error(`[Gemini] Key ${i + 1} failed with model ${modelId}: ${message}`);
+        break; 
+      }
     }
   }
 
