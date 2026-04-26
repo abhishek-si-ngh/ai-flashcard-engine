@@ -263,4 +263,3 @@ Return ONLY JSON:
     return JSON.parse(jsonMatch[0]);
   }
 }
-}
