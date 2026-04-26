@@ -45,21 +45,67 @@ export default async function HomePage() {
           <section style={{ padding: "3rem 2.5rem" }}>
             <div style={{ maxWidth: 1200, margin: "0 auto" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-                <h1>Welcome back, <span className="gradient-text">{session.user?.name?.split(' ')[0]}</span>!</h1>
+                <h1 style={{ fontSize: "2.5rem" }}>Welcome back, <span className="gradient-text">{session.user?.name?.split(' ')[0]}</span>!</h1>
                 <Link href="/upload" className="btn btn-primary">
                   <span>📄</span> New Deck
                 </Link>
               </div>
               
-              <div style={{ display: "grid", gridTemplateColumns: "3fr 1fr", gap: "2rem", alignItems: "start" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "3fr 1.2fr", gap: "2.5rem", alignItems: "start" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
                   <DashboardStats />
                   
-                  <div className="card" style={{ padding: "1.5rem" }}>
-                    <h3 style={{ marginBottom: "1rem" }}>Recent Decks</h3>
-                    <div style={{ textAlign: "center", padding: "2rem" }}>
-                       <Link href="/library" className="btn btn-secondary">View My Library</Link>
+                  <div className="card" style={{ padding: "2rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+                      <h3 style={{ margin: 0 }}>Recent Decks</h3>
+                      <Link href="/library" style={{ fontSize: "0.85rem", color: "var(--accent-light)", fontWeight: 600, textDecoration: "none" }}>View All →</Link>
                     </div>
+                    
+                    {/* Fetch recent decks */}
+                    {await (async () => {
+                      const recentDecks = await prisma.deck.findMany({
+                        where: { userId: session.user?.id },
+                        orderBy: { updatedAt: "desc" },
+                        take: 3,
+                        include: { _count: { select: { cards: true } } }
+                      });
+
+                      if (recentDecks.length === 0) {
+                        return (
+                          <div style={{ textAlign: "center", padding: "2rem", color: "var(--text-muted)" }}>
+                            <p>You haven&apos;t created any decks yet.</p>
+                            <Link href="/upload" className="btn btn-primary btn-sm" style={{ marginTop: "1rem" }}>Create Your First Deck</Link>
+                          </div>
+                        );
+                      }
+
+                      return (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                          {recentDecks.map((deck) => (
+                            <Link 
+                              key={deck.id} 
+                              href={`/deck/${deck.id}`}
+                              className="card"
+                              style={{ 
+                                padding: "1.25rem", textDecoration: "none", color: "inherit",
+                                display: "flex", justifyContent: "space-between", alignItems: "center",
+                                background: "var(--bg-elevated)", border: "1px solid var(--border)",
+                                transition: "all 0.2s"
+                              }}
+                            >
+                              <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                                <span style={{ fontSize: "1.5rem" }}>{deck.emoji}</span>
+                                <div>
+                                  <div style={{ fontWeight: 600 }}>{deck.title}</div>
+                                  <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{deck._count.cards} Cards</div>
+                                </div>
+                              </div>
+                              <span style={{ color: "var(--text-muted)" }}>→</span>
+                            </Link>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
                 
