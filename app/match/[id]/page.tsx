@@ -27,14 +27,14 @@ export default function MatchGame() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/decks/${id}`)
+    fetch(`/api/decks/${id}/match`)
       .then((res) => res.json())
       .then((data) => {
-        const shuffledAll = [...data.deck.cards].sort(() => Math.random() - 0.5);
-        const deckCards = shuffledAll.slice(0, 5); // Pick 5 random cards
+        if (data.error) throw new Error(data.error);
+        const deckCards = data.cards;
         
-        const left = deckCards.map((c: Card) => ({ id: c.id, text: c.front }));
-        const rightItemsSource = deckCards.map((c: Card) => ({ id: c.id, text: c.back }));
+        const left = deckCards.map((c: any) => ({ id: c.id, text: c.front }));
+        const rightItemsSource = deckCards.map((c: any) => ({ id: c.id, text: c.back }));
         const rightShuffled = [...rightItemsSource].sort(() => Math.random() - 0.5);
         
         setLeftItems(left);
@@ -53,7 +53,6 @@ export default function MatchGame() {
         const allOptions = [correctSet];
         while (allOptions.length < 4) {
           const fakeSet = left.map((_: GameItem, i: number) => `${i + 1}-${String.fromCharCode(97 + Math.floor(Math.random() * left.length))}`);
-          // Ensure it's unique and not the correct set
           if (!allOptions.some((opt: string[]) => opt.join(",") === fakeSet.join(","))) {
             allOptions.push(fakeSet);
           }
@@ -77,7 +76,17 @@ export default function MatchGame() {
     setIsAnswered(true);
   }
 
-  if (loading) return <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center" }}><div className="spinner" /></div>;
+  if (loading) {
+    return (
+      <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", background: "var(--bg-base)" }}>
+        <div style={{ textAlign: "center" }}>
+          <div className="spinner" style={{ margin: "0 auto 1.5rem" }} />
+          <h3 style={{ color: "var(--text-primary)", marginBottom: "0.5rem" }}>AI is distilling keywords...</h3>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>Converting long sentences into precise matching terms.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-base)", padding: "2rem" }}>

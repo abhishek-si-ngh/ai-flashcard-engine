@@ -235,4 +235,33 @@ export async function generateAIQuiz(context: string, count: number = 10): Promi
     return JSON.parse(jsonMatch[0]);
   }
 }
+// Distill cards into keywords for Match Game
+export async function distillCardsForMatch(cards: { front: string, back: string }[]): Promise<{ id: string, front: string, back: string }[]> {
+  const prompt = `Convert these flashcards into VERY SHORT keywords (max 3-4 words each) for a matching game.
+  
+  Format: JSON array of objects with "front" and "back" keywords.
+  
+  Cards:
+  ${JSON.stringify(cards)}
+  
+  Return ONLY JSON.`;
 
+  const result = await executeWithKeyRotation<any>(model => 
+    model.generateContent({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: "application/json" }
+    })
+  );
+  
+  const response = result.response.text();
+  try {
+    const distilled = JSON.parse(response);
+    return distilled.map((d: any, i: number) => ({
+      id: (cards[i] as any).id,
+      front: d.front,
+      back: d.back
+    }));
+  } catch (e) {
+    return cards.map(c => ({ ...c, id: (c as any).id })); // Fallback to original
+  }
+}
