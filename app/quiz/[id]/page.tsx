@@ -74,7 +74,17 @@ export default function QuizPage() {
     }
   }
 
-  if (loading) return <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center" }}><div className="spinner" /></div>;
+  if (loading) {
+    return (
+      <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", background: "var(--bg-base)", padding: "2rem" }}>
+        <div style={{ textAlign: "center" }}>
+          <div className="spinner" style={{ margin: "0 auto 1.5rem" }} />
+          <h3 style={{ color: "var(--text-primary)", marginBottom: "0.5rem" }}>AI is crafting your custom quiz...</h3>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>Generating fresh, rephrased questions with explanations.</p>
+        </div>
+      </div>
+    );
+  }
   
   if (isFinished) {
     return (
