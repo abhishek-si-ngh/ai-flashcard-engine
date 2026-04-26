@@ -230,7 +230,7 @@ ANSWER RULES:
 - Keep answers concise (max 10–12 words)
 
 EXPLANATION (IMPORTANT):
-- Add a short explanation (1–2 lines) for each answer
+- Add a VERY short explanation (EXACTLY 1 sentence) for each answer
 
 Return ONLY valid JSON:
 
