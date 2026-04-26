@@ -97,23 +97,23 @@ export default function QuizPage() {
   const currentCard = cards[currentIndex];
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-base)", padding: "2rem" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-base)", padding: "1.5rem" }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-          <Link href={`/deck/${id}`} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: "0.9rem" }}>← Quit Quiz</Link>
-          <div style={{ fontWeight: 600, color: "var(--text-primary)" }}>Question {currentIndex + 1} of {cards.length}</div>
-          <div style={{ color: "var(--accent-light)", fontWeight: 700 }}>Score: {score}</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <Link href={`/deck/${id}`} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: "0.85rem" }}>← Quit Quiz</Link>
+          <div style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: "0.9rem" }}>Question {currentIndex + 1} of {cards.length}</div>
+          <div style={{ color: "var(--accent-light)", fontWeight: 700, fontSize: "0.9rem" }}>Score: {score}</div>
         </div>
 
-        <div className="progress-bar" style={{ marginBottom: "3rem", height: 8 }}>
+        <div className="progress-bar" style={{ marginBottom: "1.5rem", height: 6 }}>
           <div className="progress-fill" style={{ width: `${((currentIndex + 1) / cards.length) * 100}%` }} />
         </div>
 
-        <div className="card" style={{ padding: "4rem 3rem", marginBottom: "2rem", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}>
-          <h2 style={{ fontSize: "1.75rem", lineHeight: 1.4, color: "var(--text-primary)", fontWeight: 600 }}>{currentCard.question}</h2>
+        <div className="card" style={{ padding: "2.5rem 2rem", marginBottom: "1.5rem", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}>
+          <h2 style={{ fontSize: "1.5rem", lineHeight: 1.3, color: "var(--text-primary)", fontWeight: 600 }}>{currentCard.question}</h2>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
           {currentCard.options.map((option, i) => {
             const isCorrect = option === currentCard.correctAnswer;
             const isSelected = option === selectedOption;
@@ -141,29 +141,29 @@ export default function QuizPage() {
                 onClick={() => handleOptionSelect(option)}
                 className="card option-card"
                 style={{ 
-                  padding: "1.75rem", 
+                  padding: "1.25rem", 
                   textAlign: "left", 
                   cursor: isAnswered ? "default" : "pointer",
                   border: `2px solid ${borderColor}`, 
                   background: bgColor,
                   transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                   display: "flex",
-                  gap: "1.25rem",
+                  gap: "1rem",
                   alignItems: "center",
                   width: "100%",
-                  minHeight: "100px",
+                  minHeight: "80px",
                   position: "relative"
                 }}
               >
                 <div style={{ 
-                  width: 36, 
-                  height: 36, 
+                  width: 32, 
+                  height: 32, 
                   borderRadius: "50%", 
                   border: `1px solid ${isSelected ? "transparent" : "var(--border)"}`,
                   display: "flex", 
                   alignItems: "center", 
                   justifyContent: "center", 
-                  fontSize: "1rem",
+                  fontSize: "0.9rem",
                   fontWeight: 700,
                   flexShrink: 0,
                   background: isSelected ? "var(--accent-light)" : "var(--bg-elevated)",
@@ -174,9 +174,9 @@ export default function QuizPage() {
                 </div>
                 <span style={{ 
                   fontWeight: 500, 
-                  fontSize: "1.05rem", 
+                  fontSize: "0.95rem", 
                   color: textColor,
-                  lineHeight: 1.5,
+                  lineHeight: 1.4,
                   flex: 1
                 }}>
                   {option}
@@ -187,8 +187,8 @@ export default function QuizPage() {
         </div>
 
         {isAnswered && (
-          <div style={{ marginTop: "3rem", display: "flex", justifyContent: "center", animation: "fadeIn 0.4s ease" }}>
-            <button onClick={handleNext} className="btn btn-primary btn-lg" style={{ minWidth: 240, padding: "1rem 2rem", fontSize: "1.1rem" }}>
+          <div style={{ marginTop: "2rem", display: "flex", justifyContent: "center", animation: "fadeIn 0.4s ease" }}>
+            <button onClick={handleNext} className="btn btn-primary btn-lg" style={{ minWidth: 200, padding: "0.75rem 1.5rem", fontSize: "1rem" }}>
               {currentIndex < cards.length - 1 ? "Next Question →" : "Finish Quiz"}
             </button>
           </div>

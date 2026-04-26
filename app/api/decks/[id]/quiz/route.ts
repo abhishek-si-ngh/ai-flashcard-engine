@@ -29,14 +29,15 @@ export async function GET(
       const distractors = otherCards
         .sort(() => 0.5 - Math.random())
         .slice(0, 3)
-        .map((c) => c.back);
+        .map((c) => c.back.length > 140 ? c.back.substring(0, 137) + "..." : c.back);
 
-      const options = [...distractors, card.back].sort(() => 0.5 - Math.random());
+      const correctAnswer = card.back.length > 140 ? card.back.substring(0, 137) + "..." : card.back;
+      const options = [...distractors, correctAnswer].sort(() => 0.5 - Math.random());
 
       return {
         id: card.id,
         question: card.front,
-        correctAnswer: card.back,
+        correctAnswer: correctAnswer,
         options,
         hint: card.hint,
         type: card.type,

@@ -44,6 +44,7 @@ Generation rules:
 - Generate 20–40 flashcards depending on content length
 - Cover the ENTIRE content (not just summary)
 - Ensure diversity in question types
+- KEEP ANSWERS CONCISE: Max 2 short sentences per answer. Focus on the core fact.
 
 Return ONLY valid JSON in this format:
 {
