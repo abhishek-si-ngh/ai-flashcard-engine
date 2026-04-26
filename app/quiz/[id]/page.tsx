@@ -24,21 +24,33 @@ export default function QuizPage() {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isFinished, setIsFinished] = useState(false);
   const [startTime] = useState(Date.now());
 
-  useEffect(() => {
+  const loadQuiz = useCallback(() => {
+    setLoading(true);
+    setError(null);
     fetch(`/api/decks/${id}/quiz`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to generate quiz. AI might be busy.");
+        return res.json();
+      })
       .then((data) => {
+        if (data.error) throw new Error(data.error);
         setCards(data.quiz);
         setLoading(false);
       })
       .catch((err) => {
         console.error(err);
+        setError(err.message);
         setLoading(false);
       });
   }, [id]);
+
+  useEffect(() => {
+    loadQuiz();
+  }, [loadQuiz]);
 
   async function handleFinish() {
     const duration = Math.floor((Date.now() - startTime) / 1000);
@@ -72,6 +84,19 @@ export default function QuizPage() {
     } else {
       handleFinish();
     }
+  }
+
+  if (error) {
+    return (
+      <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", background: "var(--bg-base)", padding: "2rem" }}>
+        <div className="card" style={{ maxWidth: 400, textAlign: "center", padding: "2.5rem" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>⚠️</div>
+          <h3 style={{ marginBottom: "0.5rem" }}>Failed to load Quiz</h3>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "1.5rem" }}>{error}</p>
+          <button onClick={loadQuiz} className="btn btn-primary" style={{ width: "100%" }}>Try Again</button>
+        </div>
+      </div>
+    );
   }
 
   if (loading) {

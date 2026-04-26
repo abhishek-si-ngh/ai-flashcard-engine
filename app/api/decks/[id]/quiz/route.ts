@@ -26,19 +26,50 @@ export async function GET(
     // Use PDF content if available, otherwise use cards as context
     const context = deck.pdfContent || deck.cards.map(c => `${c.front}\n${c.back}`).join("\n\n");
     
-    // Generate fresh questions via AI
-    const aiQuiz = await generateAIQuiz(context, 10);
+    // Try generating fresh questions via AI
+    let quizCards;
+    try {
+      const aiQuiz = await generateAIQuiz(context, 10);
+      quizCards = aiQuiz.map((q, i) => ({
+        id: `ai-${i}`,
+        question: q.question,
+        options: q.options,
+        correctAnswer: q.correctAnswer,
+        explanation: q.explanation,
+        difficulty: q.difficulty,
+        topic: q.topic,
+        hint: null
+      }));
+    } catch (aiError) {
+      console.error("AI Quiz generation failed, falling back to cards:", aiError);
+      
+      // FALLBACK: Generate quiz from existing cards if AI fails
+      const selectedCards = [...deck.cards]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, 10);
 
-    const quizCards = aiQuiz.map((q, i) => ({
-      id: `ai-${i}`,
-      question: q.question,
-      options: q.options,
-      correctAnswer: q.correctAnswer,
-      explanation: q.explanation,
-      difficulty: q.difficulty,
-      topic: q.topic,
-      hint: null
-    }));
+      quizCards = selectedCards.map((card) => {
+        const otherCards = deck.cards.filter((c) => c.id !== card.id);
+        const distractors = otherCards
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 3)
+          .map((c) => c.back.length > 140 ? c.back.substring(0, 137) + "..." : c.back);
+
+        const correctAnswer = card.back.length > 140 ? card.back.substring(0, 137) + "..." : card.back;
+        const options = [...distractors, correctAnswer].sort(() => 0.5 - Math.random());
+
+        return {
+          id: card.id,
+          question: card.front,
+          correctAnswer: correctAnswer,
+          options,
+          explanation: "Generated from your flashcard.",
+          difficulty: "Normal",
+          topic: deck.title,
+          hint: card.hint,
+        };
+      });
+    }
 
     return NextResponse.json({ quiz: quizCards });
   } catch (err) {
