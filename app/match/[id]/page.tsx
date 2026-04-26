@@ -47,13 +47,13 @@ export default function MatchGame() {
         setCorrectMatches(matches);
 
         // Generate MCQ options
-        const correctSet = left.map((_, i) => `${i + 1}-${String.fromCharCode(97 + matches[i])}`);
+        const correctSet = left.map((_: GameItem, i: number) => `${i + 1}-${String.fromCharCode(97 + matches[i])}`);
         
         const allOptions = [correctSet];
         while (allOptions.length < 4) {
-          const fakeSet = left.map((_, i) => `${i + 1}-${String.fromCharCode(97 + Math.floor(Math.random() * left.length))}`);
+          const fakeSet = left.map((_: GameItem, i: number) => `${i + 1}-${String.fromCharCode(97 + Math.floor(Math.random() * left.length))}`);
           // Ensure it's unique and not the correct set
-          if (!allOptions.some(opt => opt.join(",") === fakeSet.join(","))) {
+          if (!allOptions.some((opt: string[]) => opt.join(",") === fakeSet.join(","))) {
             allOptions.push(fakeSet);
           }
         }
