@@ -100,7 +100,7 @@ async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Pr
       console.log(`[Gemini] Using API Key ${i + 1}/${apiKeys.length}`);
       const genAI = new GoogleGenerativeAI(apiKeys[i]);
       const model = genAI.getGenerativeModel(
-        { model: "gemini-1.5-flash-001" },
+        { model: "gemini-1.5-flash" },
         { apiVersion: "v1" }
       );
 
@@ -143,31 +143,38 @@ ${text.slice(0, 50000)}
   return JSON.parse(jsonMatch[0]) as GeneratedDeck;
 }
 
-// PDF → Flashcards (FIXED VERSION)
+// PDF → Flashcards (ULTRA STABLE VERSION)
 export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<GeneratedDeck & { rawText: string }> {
   const base64Data = pdfBuffer.toString("base64");
 
-  const result = await executeWithKeyRotation<any>(model =>
-    model.generateContent([
-      {
-        inlineData: {
-          mimeType: "application/pdf",
-          data: base64Data,
-        },
-      },
-      {
-        text: `${SYSTEM_PROMPT}
+  const prompt = `${SYSTEM_PROMPT}
 
 IMPORTANT:
-- Extract full meaning from PDF
-- Do NOT summarize only
-- Generate diverse, deep-thinking flashcards
-- Include at least 20 flashcards
+- Extract all key information from the PDF
+- Create at least 20-30 flashcards
+- REPHRASE into analytical questions
+- Return valid JSON for the deck structure
 
 ALSO: After the JSON, provide a section "---RAW_TEXT---" containing the full extracted text from the PDF so I can store it for later chat.
-`,
-      },
-    ])
+`;
+
+  const result = await executeWithKeyRotation<any>(model =>
+    model.generateContent({
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                mimeType: "application/pdf",
+                data: base64Data,
+              },
+            },
+            { text: prompt }
+          ]
+        }
+      ]
+    })
   );
 
   const response = result.response.text();
