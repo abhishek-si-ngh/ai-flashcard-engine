@@ -196,28 +196,55 @@ export async function chatWithDocument(documentContent: string, query: string, h
 
 // Dynamic AI Quiz Generation
 export async function generateAIQuiz(context: string, count: number = 10): Promise<any[]> {
-  const prompt = `You are an AI examiner. Create a ${count}-question MCQ quiz based on the following content.
-  
-  Content:
-  ${context.slice(0, 40000)}
-  
-  Requirements:
-  1. Generate exactly ${count} questions.
-  2. Each question must have exactly 4 diverse options (A, B, C, D).
-  3. Correct answer MUST be one of the options.
-  4. Answers must be CONCISE (max 12 words).
-  5. Questions should test understanding, NOT just rote memorization.
-  6. DO NOT use the same exact wording as the source material. Rephrase EVERYTHING.
-  7. Return ONLY a valid JSON array of objects.
-  
-  Format:
-  [
-    {
-      "question": "rephrased analytical question",
-      "options": ["Concise Option 1", "Concise Option 2", "Concise Option 3", "Concise Option 4"],
-      "correctAnswer": "the exact string of the correct option"
-    }
-  ]`;
+  const prompt = `You are an expert examiner designing a HIGH-QUALITY MCQ quiz.
+
+Create a ${count}-question quiz based on the content.
+
+Content:
+${context.slice(0, 40000)}
+
+Requirements:
+1. Generate EXACTLY ${count} questions
+2. Each question must have EXACTLY 4 options
+3. One correct answer MUST match exactly one option
+
+QUALITY RULES:
+- Questions must test understanding, not memorization
+- Avoid copying text directly
+- Include a mix of:
+  • Easy (30%)
+  • Medium (50%)
+  • Hard / edge-case (20%)
+
+- Include:
+  • Conceptual questions
+  • Application-based questions
+  • Tricky / misconception-based questions
+
+OPTIONS RULES:
+- All 4 options must be plausible
+- Avoid obviously wrong answers
+- Keep options similar in length and style
+
+ANSWER RULES:
+- Keep answers concise (max 10–12 words)
+
+EXPLANATION (IMPORTANT):
+- Add a short explanation (1–2 lines) for each answer
+
+Return ONLY valid JSON:
+
+[
+  {
+    "question": "analytical question",
+    "options": ["Option A", "Option B", "Option C", "Option D"],
+    "correctAnswer": "exact correct option",
+    "explanation": "why this is correct",
+    "difficulty": "easy | medium | hard",
+    "topic": "main concept tested"
+  }
+]
+`;
 
   const result = await executeWithKeyRotation<any>(model => model.generateContent(prompt));
   const response = result.response.text();

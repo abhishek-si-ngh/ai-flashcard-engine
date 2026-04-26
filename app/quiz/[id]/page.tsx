@@ -9,6 +9,9 @@ interface QuizCard {
   question: string;
   correctAnswer: string;
   options: string[];
+  explanation: string;
+  difficulty: string;
+  topic: string;
   hint: string | null;
 }
 
@@ -96,6 +99,10 @@ export default function QuizPage() {
 
   const currentCard = cards[currentIndex];
 
+  const difficultyColor = 
+    currentCard.difficulty?.toLowerCase() === "hard" ? "#ef4444" : 
+    currentCard.difficulty?.toLowerCase() === "medium" ? "#f59e0b" : "#10b981";
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-base)", padding: "1.5rem" }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
@@ -109,8 +116,23 @@ export default function QuizPage() {
           <div className="progress-fill" style={{ width: `${((currentIndex + 1) / cards.length) * 100}%` }} />
         </div>
 
-        <div className="card" style={{ padding: "2.5rem 2rem", marginBottom: "1.5rem", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}>
-          <h2 style={{ fontSize: "1.5rem", lineHeight: 1.3, color: "var(--text-primary)", fontWeight: 600 }}>{currentCard.question}</h2>
+        <div className="card" style={{ padding: "2.5rem 2rem", marginBottom: "1.5rem", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.1)", position: "relative" }}>
+          {currentCard.difficulty && (
+            <div style={{ 
+              position: "absolute", top: "1rem", left: "1.5rem", 
+              fontSize: "0.7rem", fontWeight: 700, textTransform: "uppercase",
+              padding: "0.25rem 0.6rem", borderRadius: 4, background: `${difficultyColor}20`, color: difficultyColor,
+              border: `1px solid ${difficultyColor}40`
+            }}>
+              {currentCard.difficulty}
+            </div>
+          )}
+          {currentCard.topic && (
+            <div style={{ position: "absolute", top: "1rem", right: "1.5rem", fontSize: "0.7rem", color: "var(--text-muted)", fontWeight: 500 }}>
+              Topic: {currentCard.topic}
+            </div>
+          )}
+          <h2 style={{ fontSize: "1.5rem", lineHeight: 1.3, color: "var(--text-primary)", fontWeight: 600, marginTop: "0.5rem" }}>{currentCard.question}</h2>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
@@ -120,7 +142,6 @@ export default function QuizPage() {
             
             let borderColor = "var(--border)";
             let bgColor = "var(--bg-surface)";
-            let textColor = "var(--text-primary)";
             
             if (isAnswered) {
               if (isCorrect) {
@@ -175,7 +196,7 @@ export default function QuizPage() {
                 <span style={{ 
                   fontWeight: 500, 
                   fontSize: "0.95rem", 
-                  color: textColor,
+                  color: "var(--text-primary)",
                   lineHeight: 1.4,
                   flex: 1
                 }}>
@@ -187,10 +208,25 @@ export default function QuizPage() {
         </div>
 
         {isAnswered && (
-          <div style={{ marginTop: "2rem", display: "flex", justifyContent: "center", animation: "fadeIn 0.4s ease" }}>
-            <button onClick={handleNext} className="btn btn-primary btn-lg" style={{ minWidth: 200, padding: "0.75rem 1.5rem", fontSize: "1rem" }}>
-              {currentIndex < cards.length - 1 ? "Next Question →" : "Finish Quiz"}
-            </button>
+          <div className="animate-fade-in" style={{ marginTop: "1.5rem" }}>
+            {currentCard.explanation && (
+              <div style={{ 
+                padding: "1.25rem", background: "var(--bg-elevated)", 
+                borderRadius: "1rem", border: "1px solid var(--border)",
+                marginBottom: "1.5rem", fontSize: "0.9rem", lineHeight: 1.6
+              }}>
+                <div style={{ fontWeight: 700, color: "var(--accent-light)", marginBottom: "0.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <span>💡</span> Explanation
+                </div>
+                <div style={{ color: "var(--text-secondary)" }}>{currentCard.explanation}</div>
+              </div>
+            )}
+            
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <button onClick={handleNext} className="btn btn-primary btn-lg" style={{ minWidth: 200, padding: "0.75rem 1.5rem", fontSize: "1rem" }}>
+                {currentIndex < cards.length - 1 ? "Next Question →" : "Finish Quiz"}
+              </button>
+            </div>
           </div>
         )}
       </div>

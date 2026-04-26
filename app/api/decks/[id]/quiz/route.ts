@@ -34,6 +34,9 @@ export async function GET(
       question: q.question,
       options: q.options,
       correctAnswer: q.correctAnswer,
+      explanation: q.explanation,
+      difficulty: q.difficulty,
+      topic: q.topic,
       hint: null
     }));
 
