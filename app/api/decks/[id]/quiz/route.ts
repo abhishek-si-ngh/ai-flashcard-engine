@@ -22,8 +22,13 @@ export async function GET(
       return NextResponse.json({ error: "Deck not found" }, { status: 404 });
     }
 
-    // Generate MCQs from cards
-    const quizCards = deck.cards.map((card) => {
+    // Shuffle and take max 10 cards for the quiz
+    const selectedCards = [...deck.cards]
+      .sort(() => 0.5 - Math.random())
+      .slice(0, 10);
+
+    // Generate MCQs from selected cards
+    const quizCards = selectedCards.map((card) => {
       // Get 3 random distractors from other cards in the same deck
       const otherCards = deck.cards.filter((c) => c.id !== card.id);
       const distractors = otherCards
