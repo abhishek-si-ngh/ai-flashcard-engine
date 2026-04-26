@@ -30,7 +30,8 @@ export default function MatchGame() {
     fetch(`/api/decks/${id}`)
       .then((res) => res.json())
       .then((data) => {
-        const deckCards = data.deck.cards.slice(0, 5); // Limit to 5 for better UI
+        const shuffledAll = [...data.deck.cards].sort(() => Math.random() - 0.5);
+        const deckCards = shuffledAll.slice(0, 5); // Pick 5 random cards
         
         const left = deckCards.map((c: Card) => ({ id: c.id, text: c.front }));
         const rightItemsSource = deckCards.map((c: Card) => ({ id: c.id, text: c.back }));
