@@ -166,18 +166,19 @@ ${text.slice(0, 50000)}
 
 // PDF → Flashcards (ROCK SOLID LOCAL EXTRACTION)
 export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<GeneratedDeck & { rawText: string }> {
-  const pdf = require("pdf-parse");
-  console.log("[Gemini] Extracting text from PDF locally...");
+  console.log("[Gemini] Starting local PDF extraction...");
   
   try {
-    const data = await pdf(pdfBuffer);
-    const text = data.text;
+    // Robust require with proper function targeting
+    const pdfReader = require("pdf-parse");
+    const data = await pdfReader(pdfBuffer);
+    const text = data?.text;
 
-    if (!text || text.trim().length < 50) {
-      throw new Error("The PDF seems to have very little text. It might be a scanned image or empty.");
+    if (!text || text.trim().length < 20) {
+      throw new Error("The PDF appears to be empty or contains only images (scanned document).");
     }
 
-    console.log(`[Gemini] Extracted ${text.length} characters. Sending to AI...`);
+    console.log(`[Gemini] Extracted ${text.length} characters successfully.`);
     
     const generated = await generateFlashcardsFromText(text);
     
@@ -186,8 +187,9 @@ export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<Gene
       rawText: text
     };
   } catch (error: any) {
-    console.error("[PDF Parse Error]:", error);
-    throw new Error("Failed to read the PDF file. Please ensure it is not password protected.");
+    console.error("[PDF Extraction Error]:", error);
+    // Provide the actual error message to the user for better debugging
+    throw new Error(`PDF Error: ${error.message || "Failed to parse file structure"}`);
   }
 }
 // Chat with Document
