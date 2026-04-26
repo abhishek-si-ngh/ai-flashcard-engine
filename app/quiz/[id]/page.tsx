@@ -97,73 +97,99 @@ export default function QuizPage() {
   const currentCard = cards[currentIndex];
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-surface)", padding: "2rem" }}>
-      <div style={{ maxWidth: 800, margin: "0 auto" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-base)", padding: "2rem" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-          <Link href={`/deck/${id}`} style={{ textDecoration: "none", color: "var(--text-muted)" }}>← Quit Quiz</Link>
-          <div style={{ fontWeight: 600 }}>Question {currentIndex + 1} of {cards.length}</div>
+          <Link href={`/deck/${id}`} style={{ textDecoration: "none", color: "var(--text-muted)", fontSize: "0.9rem" }}>← Quit Quiz</Link>
+          <div style={{ fontWeight: 600, color: "var(--text-primary)" }}>Question {currentIndex + 1} of {cards.length}</div>
           <div style={{ color: "var(--accent-light)", fontWeight: 700 }}>Score: {score}</div>
         </div>
 
-        <div className="progress-bar" style={{ marginBottom: "3rem" }}>
+        <div className="progress-bar" style={{ marginBottom: "3rem", height: 8 }}>
           <div className="progress-fill" style={{ width: `${((currentIndex + 1) / cards.length) * 100}%` }} />
         </div>
 
-        <div className="card" style={{ padding: "3rem", marginBottom: "2rem", textAlign: "center" }}>
-          <h2 style={{ fontSize: "1.5rem", lineHeight: 1.5 }}>{currentCard.question}</h2>
+        <div className="card" style={{ padding: "4rem 3rem", marginBottom: "2rem", textAlign: "center", boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}>
+          <h2 style={{ fontSize: "1.75rem", lineHeight: 1.4, color: "var(--text-primary)", fontWeight: 600 }}>{currentCard.question}</h2>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem" }}>
           {currentCard.options.map((option, i) => {
             const isCorrect = option === currentCard.correctAnswer;
             const isSelected = option === selectedOption;
             
             let borderColor = "var(--border)";
             let bgColor = "var(--bg-surface)";
+            let textColor = "var(--text-primary)";
             
             if (isAnswered) {
               if (isCorrect) {
                 borderColor = "#10b981";
-                bgColor = "rgba(16, 185, 129, 0.1)";
+                bgColor = "rgba(16, 185, 129, 0.15)";
               } else if (isSelected) {
                 borderColor = "#ef4444";
-                bgColor = "rgba(239, 68, 68, 0.1)";
+                bgColor = "rgba(239, 68, 68, 0.15)";
               }
             } else if (isSelected) {
               borderColor = "var(--accent-light)";
+              bgColor = "rgba(99, 102, 241, 0.05)";
             }
 
             return (
               <button
                 key={i}
                 onClick={() => handleOptionSelect(option)}
-                className="card"
+                className="card option-card"
                 style={{ 
-                  padding: "1.5rem", textAlign: "left", cursor: isAnswered ? "default" : "pointer",
-                  border: `2px solid ${borderColor}`, background: bgColor,
-                  transition: "all 0.2s"
+                  padding: "1.75rem", 
+                  textAlign: "left", 
+                  cursor: isAnswered ? "default" : "pointer",
+                  border: `2px solid ${borderColor}`, 
+                  background: bgColor,
+                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                  display: "flex",
+                  gap: "1.25rem",
+                  alignItems: "center",
+                  width: "100%",
+                  minHeight: "100px",
+                  position: "relative"
                 }}
               >
-                <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-                  <div style={{ 
-                    width: 24, height: 24, borderRadius: "50%", border: "1px solid var(--border)",
-                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem",
-                    background: isSelected ? "var(--accent-light)" : "transparent",
-                    color: isSelected ? "white" : "var(--text-muted)"
-                  }}>
-                    {String.fromCharCode(65 + i)}
-                  </div>
-                  <span style={{ fontWeight: 500 }}>{option}</span>
+                <div style={{ 
+                  width: 36, 
+                  height: 36, 
+                  borderRadius: "50%", 
+                  border: `1px solid ${isSelected ? "transparent" : "var(--border)"}`,
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "center", 
+                  fontSize: "1rem",
+                  fontWeight: 700,
+                  flexShrink: 0,
+                  background: isSelected ? "var(--accent-light)" : "var(--bg-elevated)",
+                  color: isSelected ? "white" : "var(--text-secondary)",
+                  boxShadow: isSelected ? "0 4px 10px rgba(99, 102, 241, 0.3)" : "none"
+                }}>
+                  {String.fromCharCode(65 + i)}
                 </div>
+                <span style={{ 
+                  fontWeight: 500, 
+                  fontSize: "1.05rem", 
+                  color: textColor,
+                  lineHeight: 1.5,
+                  flex: 1
+                }}>
+                  {option}
+                </span>
               </button>
             );
           })}
         </div>
 
         {isAnswered && (
-          <div style={{ marginTop: "2rem", display: "flex", justifyContent: "center", animation: "fadeIn 0.3s ease" }}>
-            <button onClick={handleNext} className="btn btn-primary btn-lg" style={{ minWidth: 200 }}>
-              {currentIndex < cards.length - 1 ? "Next Question" : "Finish Quiz"}
+          <div style={{ marginTop: "3rem", display: "flex", justifyContent: "center", animation: "fadeIn 0.4s ease" }}>
+            <button onClick={handleNext} className="btn btn-primary btn-lg" style={{ minWidth: 240, padding: "1rem 2rem", fontSize: "1.1rem" }}>
+              {currentIndex < cards.length - 1 ? "Next Question →" : "Finish Quiz"}
             </button>
           </div>
         )}

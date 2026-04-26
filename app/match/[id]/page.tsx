@@ -98,18 +98,18 @@ export default function MatchGame() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-surface)", padding: "2rem" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-base)", padding: "2rem" }}>
       <div style={{ maxWidth: 1000, margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
-          <Link href={`/deck/${id}`} style={{ textDecoration: "none", color: "var(--text-muted)" }}>← Quit Game</Link>
-          <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "var(--accent-light)" }}>Time: {timer}s</div>
-          <div style={{ fontWeight: 600 }}>Matched: {matched.length} / {cards.length}</div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2.5rem" }}>
+          <Link href={`/deck/${id}`} style={{ textDecoration: "none", color: "var(--text-muted)", fontWeight: 500 }}>← Back</Link>
+          <div style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--text-primary)" }}>{timer}s</div>
+          <div style={{ color: "var(--text-muted)", fontWeight: 500 }}>Matched: <span style={{ color: "var(--accent-light)", fontWeight: 700 }}>{matched.length}</span> / {cards.length}</div>
         </div>
 
         <div style={{ 
           display: "grid", 
-          gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
-          gap: "1rem", 
+          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", 
+          gap: "1.25rem", 
           perspective: "1000px" 
         }}>
           {items.map((item, i) => {
@@ -122,22 +122,26 @@ export default function MatchGame() {
                 onClick={() => handleSelect(i)}
                 className="card"
                 style={{
-                  height: 140,
+                  height: 160,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   textAlign: "center",
-                  padding: "1rem",
+                  padding: "1.5rem",
                   cursor: isMatched ? "default" : "pointer",
                   opacity: isMatched ? 0 : 1,
-                  transform: isSelected ? "scale(1.05)" : "scale(1)",
+                  transform: isSelected ? "scale(1.05) translateY(-5px)" : "scale(1)",
                   border: isSelected ? "2px solid var(--accent-light)" : "1px solid var(--border)",
-                  transition: "all 0.3s ease",
+                  background: isSelected ? "rgba(99, 102, 241, 0.1)" : "var(--bg-surface)",
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                   visibility: isMatched ? "hidden" : "visible",
-                  fontSize: "0.85rem",
-                  fontWeight: 500,
-                  boxShadow: isSelected ? "0 10px 20px rgba(0,0,0,0.1)" : "none",
-                  userSelect: "none"
+                  fontSize: "0.95rem",
+                  fontWeight: 600,
+                  color: "var(--text-primary)",
+                  boxShadow: isSelected ? "0 15px 30px rgba(99, 102, 241, 0.2)" : "0 4px 6px rgba(0,0,0,0.05)",
+                  userSelect: "none",
+                  lineHeight: 1.4,
+                  borderRadius: "16px"
                 }}
               >
                 {item.text}
