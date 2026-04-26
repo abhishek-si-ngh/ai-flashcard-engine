@@ -235,31 +235,53 @@ export async function generateAIQuiz(context: string, count: number = 10): Promi
     return JSON.parse(jsonMatch[0]);
   }
 }
-// Distill cards into keywords for Match Game (EXPERT OPTIMIZED)
+function cleanMatchText(text: string) {
+  return text
+    .replace(/^(what is|what are|how does|according to|explain|outline|define|list)/i, "")
+    .replace(/\?$/, "")
+    .trim();
+}
+
+function extractMatchKeyword(text: string) {
+  return text
+    .replace(/^(what is|what are|how does|according to|explain|define|list)/i, "")
+    .split(" ")
+    .filter(w => w.length > 0)
+    .slice(-2) // Take last 2 words as they usually contain the core noun/concept
+    .join(" ");
+}
+
+// Distill cards into keywords for Match Game (THE REAL SOLUTION)
 export async function distillCardsForMatch(cards: { front: string, back: string }[]): Promise<{ id: string, front: string, back: string }[]> {
+  const cleanedCards = cards.map(c => ({
+    front: cleanMatchText(c.front),
+    back: cleanMatchText(c.back)
+  }));
+
   const prompt = `
-Convert flashcards into MATCHING GAME keywords.
+Extract CORE CONCEPT keywords for a matching game.
 
 Rules:
-- Each side MUST be max 2–3 words
-- NO sentences
-- NO explanations
-- Use core concept terms only
+- DO NOT use question words (what, how, etc.)
+- Extract the MAIN concept or entity
+- Use 1–3 meaningful words only
+- Make pairs logically matchable
 
 Examples:
-"Coronary Artery Disease"
-"Blood Flow Blockage"
+"LIME" ↔ "Local Explanation"
+"SHAP" ↔ "Feature Importance"
+"Dataset" ↔ "Training Data"
 
 Return ONLY JSON:
 [
   {
-    "front": "short keyword",
-    "back": "matching keyword"
+    "front": "concept",
+    "back": "matching concept"
   }
 ]
 
 Cards:
-${JSON.stringify(cards)}
+${JSON.stringify(cleanedCards)}
 `;
 
   try {
@@ -277,15 +299,15 @@ ${JSON.stringify(cards)}
     const distilled = JSON.parse(response);
     return distilled.map((d: any, i: number) => ({
       id: (cards[i] as any).id,
-      front: d.front || cards[i].front.split(" ").slice(0, 2).join(" "),
-      back: d.back || cards[i].back.split(" ").slice(0, 2).join(" ")
+      front: d.front || extractMatchKeyword(cards[i].front),
+      back: d.back || extractMatchKeyword(cards[i].back)
     }));
   } catch (e) {
     console.error("Distillation failed, using fallback:", e);
     return cards.map(c => ({ 
       id: (c as any).id, 
-      front: c.front.split(" ").slice(0, 2).join(" "),
-      back: c.back.split(" ").slice(0, 2).join(" ")
+      front: extractMatchKeyword(c.front),
+      back: extractMatchKeyword(c.back)
     }));
   }
 }
