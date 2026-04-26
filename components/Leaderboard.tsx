@@ -39,26 +39,27 @@ export function Leaderboard() {
         {entries.map((entry, index) => (
           <div key={entry.id} style={{ 
             display: "flex", alignItems: "center", gap: "1rem", 
-            padding: "0.75rem", background: index === 0 ? "rgba(99,102,241,0.1)" : "transparent",
-            borderRadius: "var(--radius-md)", borderBottom: index === entries.length - 1 ? "none" : "1px solid var(--border)"
+            padding: "0.75rem 1rem", background: index === 0 ? "rgba(99,102,241,0.08)" : "transparent",
+            borderRadius: "var(--radius-md)", borderBottom: index === entries.length - 1 ? "none" : "1px solid var(--border)",
+            transition: "background 0.2s"
           }}>
-            <div style={{ fontWeight: 700, width: 24, color: index < 3 ? "var(--accent-light)" : "var(--text-muted)" }}>
+            <div style={{ fontWeight: 800, width: 30, color: index < 3 ? "var(--accent-light)" : "var(--text-muted)", fontSize: "0.85rem" }}>
               #{index + 1}
             </div>
             {entry.image ? (
-              <img src={entry.image} alt={entry.name} style={{ width: 32, height: 32, borderRadius: "50%" }} />
+              <img src={entry.image} alt={entry.name} style={{ width: 36, height: 36, borderRadius: "50%", border: "2px solid var(--border)" }} />
             ) : (
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.8rem" }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--bg-elevated)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.9rem" }}>
                 {entry.name?.charAt(0) || "?"}
               </div>
             )}
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: "0.9rem" }}>{entry.name || "Anonymous"}</div>
-              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Level {entry.level}</div>
+              <div style={{ fontWeight: 600, fontSize: "0.95rem", color: "var(--text-primary)" }}>{entry.name || "Anonymous"}</div>
+              <div style={{ fontSize: "0.78rem", color: "var(--text-secondary)", fontWeight: 500 }}>Level {entry.level}</div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ fontWeight: 700, color: "var(--accent-light)" }}>{entry.xp} XP</div>
-              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>🔥 {entry.streak}</div>
+              <div style={{ fontWeight: 800, color: "var(--accent-light)", fontSize: "0.95rem" }}>{entry.xp} XP</div>
+              <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", fontWeight: 500 }}>🔥 {entry.streak}</div>
             </div>
           </div>
         ))}

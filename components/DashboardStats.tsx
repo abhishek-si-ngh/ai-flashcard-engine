@@ -38,24 +38,24 @@ export function DashboardStats() {
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem", width: "100%", maxWidth: 1200, margin: "0 auto" }}>
       {/* Overview Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-        <div className="card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1.5rem" }}>
-          <div style={{ fontSize: "2.5rem" }}>🔥</div>
-          <div className="stat-value">{stats.streak}</div>
+        <div className="card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1.5rem", borderBottom: "4px solid var(--warning)", background: "var(--bg-card)" }}>
+          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🔥</div>
+          <div className="stat-value" style={{ color: "var(--warning)" }}>{stats.streak}</div>
           <div className="stat-label">Day Streak</div>
         </div>
-        <div className="card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1.5rem" }}>
-          <div style={{ fontSize: "2.5rem" }}>🎯</div>
-          <div className="stat-value">{stats.accuracy}%</div>
+        <div className="card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1.5rem", borderBottom: "4px solid var(--accent-light)", background: "var(--bg-card)" }}>
+          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🎯</div>
+          <div className="stat-value" style={{ color: "var(--accent-light)" }}>{stats.accuracy}%</div>
           <div className="stat-label">Accuracy</div>
         </div>
-        <div className="card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1.5rem" }}>
-          <div style={{ fontSize: "2.5rem" }}>⭐</div>
-          <div className="stat-value">Lvl {stats.level}</div>
-          <div className="stat-label">{stats.xp} XP</div>
+        <div className="card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1.5rem", borderBottom: "4px solid var(--success)", background: "var(--bg-card)" }}>
+          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>⭐</div>
+          <div className="stat-value" style={{ color: "var(--success)" }}>Lvl {stats.level}</div>
+          <div className="stat-label">{stats.xp} XP Earned</div>
         </div>
-        <div className="card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1.5rem" }}>
-          <div style={{ fontSize: "2.5rem" }}>🏆</div>
-          <div className="stat-value">{stats.masteredCount}</div>
+        <div className="card" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "1.5rem", borderBottom: "4px solid #a78bfa", background: "var(--bg-card)" }}>
+          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🏆</div>
+          <div className="stat-value" style={{ color: "#a78bfa" }}>{stats.masteredCount}</div>
           <div className="stat-label">Mastered</div>
         </div>
       </div>
@@ -68,19 +68,19 @@ export function DashboardStats() {
         {stats.weakTopics.length > 0 ? (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {stats.weakTopics.map((topic) => (
-              <div key={topic.title} style={{ padding: "1rem", background: "var(--bg-elevated)", borderRadius: "var(--radius-md)", border: "1px solid var(--border)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontWeight: 600 }}>
-                  <span>{topic.title}</span>
-                  <span style={{ color: topic.accuracy < 50 ? "var(--accent-red, #ef4444)" : "var(--accent-orange, #f59e0b)" }}>
+              <div key={topic.title} style={{ padding: "1.25rem", background: "var(--bg-elevated)", borderRadius: "var(--radius-md)", border: "1px solid var(--border)", boxShadow: "var(--shadow-sm)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.75rem", fontWeight: 700, fontSize: "0.95rem" }}>
+                  <span style={{ color: "var(--text-primary)" }}>{topic.title}</span>
+                  <span style={{ color: topic.accuracy < 50 ? "var(--danger)" : "var(--warning)" }}>
                     {topic.accuracy}% accuracy
                   </span>
                 </div>
-                <div style={{ height: 6, background: "var(--border)", borderRadius: 3, overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${topic.accuracy}%`, background: topic.accuracy < 50 ? "var(--accent-red, #ef4444)" : "var(--accent-orange, #f59e0b)" }} />
+                <div style={{ height: 8, background: "var(--bg-base)", borderRadius: 4, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${topic.accuracy}%`, background: topic.accuracy < 50 ? "var(--danger)" : "var(--warning)", boxShadow: "0 0 10px rgba(0,0,0,0.1)" }} />
                 </div>
               </div>
             ))}
-            <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "0.5rem" }}>
+            <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginTop: "0.75rem", textAlign: "center", fontStyle: "italic" }}>
               Focus on these topics in your next study session!
             </p>
           </div>
