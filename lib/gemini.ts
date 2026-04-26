@@ -169,8 +169,15 @@ export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<Gene
   console.log("[Gemini] Starting local PDF extraction...");
   
   try {
-    // Robust require with proper function targeting
-    const pdfReader = require("pdf-parse");
+    // Extra defensive require for production bundlers
+    const pdfLib = require("pdf-parse");
+    const pdfReader = typeof pdfLib === "function" ? pdfLib : pdfLib.default;
+    
+    if (typeof pdfReader !== "function") {
+      console.error("[PDF] Resolved reader is not a function:", typeof pdfReader);
+      throw new Error("PDF Library failed to load correctly in this environment.");
+    }
+
     const data = await pdfReader(pdfBuffer);
     const text = data?.text;
 
