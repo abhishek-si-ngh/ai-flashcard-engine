@@ -141,12 +141,12 @@ export default async function HomePage() {
               </div>
             </section>
 
-            {/* Static platform highlights for landing */}
+            {/* Global platform stats */}
             <section style={{ padding: "0 2.5rem 3rem" }}>
               <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
                 {[
-                  { label: "Cards Generated", value: "20-40", icon: "🃏" },
-                  { label: "Processing Time", value: "~15s", icon: "⚡" },
+                  { label: "Global Decks", value: globalStats.deckCount, icon: "🌍" },
+                  { label: "Global Flashcards", value: globalStats.cardCount, icon: "🃏" },
                   { label: "AI Powered", value: "100%", icon: "🤖" },
                 ].map((s) => (
                   <div key={s.label} className="card" style={{ textAlign: "center", minWidth: 160, padding: "1.5rem" }}>

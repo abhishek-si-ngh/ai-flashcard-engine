@@ -188,7 +188,6 @@ export default function UploadPage() {
                 "Use PDFs with clear text (not scanned images)",
                 "Textbook chapters, lecture notes, and study guides work great",
                 "The AI generates 20-40 cards depending on content length",
-                "You can edit any card after generation",
               ].map((tip) => (
                 <li key={tip} style={{ fontSize: "0.8rem", color: "var(--text-secondary)", display: "flex", gap: "0.5rem" }}>
                   <span style={{ color: "var(--success)" }}>✓</span> {tip}
