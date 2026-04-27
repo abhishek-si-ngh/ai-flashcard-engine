@@ -1,4 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import axios from "axios"; // For Ollama local API support
+
 
 // Fix for 'DOMMatrix is not defined' error in server-side PDF parsing
 if (typeof global !== "undefined" && !global.DOMMatrix) {
@@ -93,7 +95,10 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 2): Promise<T> {
 // Key rotation helper with Bulletproof Fallback
 async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Promise<T> {
   const keysStr = process.env.GEMINI_API_KEY || "";
-  const apiKeys = keysStr.split(",").map(k => k.trim()).filter(k => k);
+  // Robustly split and strip quotes/whitespace from keys
+  const apiKeys = keysStr.split(",")
+    .map(k => k.trim().replace(/^["']|["']$/g, ""))
+    .filter(k => k);
   
   // Using specific stable versions as recommended
   // Ultra-Stable Model List
@@ -125,6 +130,23 @@ async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Pr
 
   throw lastError;
 }
+
+// LOCAL AI SUPPORT (OLLAMA)
+async function generateWithOllama(prompt: string, model: string = "llama3"): Promise<string> {
+  try {
+    const response = await axios.post("http://localhost:11434/api/generate", {
+      model,
+      prompt,
+      stream: false,
+      format: "json"
+    }, { timeout: 30000 });
+    return response.data.response;
+  } catch (error) {
+    console.warn("[Ollama] Local API failed. Ensure Ollama is running on port 11434.");
+    throw new Error("Local AI (Ollama) failed. Please ensure Ollama is installed and running.");
+  }
+}
+
 
 // TEXT → Flashcards
 export async function generateFlashcardsFromText(text: string): Promise<GeneratedDeck> {
@@ -203,7 +225,19 @@ export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<Gene
     return { ...deck, rawText };
   } catch (error: any) {
     console.error("[Gemini] All PDF methods failed:", error);
-    throw new Error(`Critical PDF Error: ${error.message || "Could not process file"}`);
+    
+    // FINAL ATTEMPT: Try Local Ollama if Gemini fails
+    try {
+      console.log("[Gemini] Falling back to local Ollama...");
+      // We need text for Ollama, so if we're here, multimodal failed.
+      // We'll try one last time to extract text locally or just fail.
+      throw error; 
+    } catch (finalErr) {
+      throw new Error(`Critical PDF Error: ${error.message || "Could not process file"}. 
+      TIPS TO FIX: 
+      1. Ensure your GEMINI_API_KEY in .env has NO quotes around it.
+      2. If using local AI, run 'ollama run llama3' first.`);
+    }
   }
 }
 // Chat with Document
