@@ -135,18 +135,18 @@ export default async function HomePage() {
                 <Link href="/upload" className="btn btn-primary btn-lg">
                   <span>📄</span> Upload PDF — It&apos;s Free
                 </Link>
-                <Link href="/library" className="btn btn-secondary btn-lg">
-                  <span>📚</span> Browse Library
+                <Link href="/upload" className="btn btn-secondary btn-lg">
+                  <span>🚀</span> Try Without Sign In
                 </Link>
               </div>
             </section>
 
-            {/* Global stats for landing */}
+            {/* Static platform highlights for landing */}
             <section style={{ padding: "0 2.5rem 3rem" }}>
               <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
                 {[
-                  { label: "Decks Created", value: globalStats.deckCount, icon: "📚" },
-                  { label: "Total Cards", value: globalStats.cardCount, icon: "🃏" },
+                  { label: "Cards Generated", value: "20-40", icon: "🃏" },
+                  { label: "Processing Time", value: "~15s", icon: "⚡" },
                   { label: "AI Powered", value: "100%", icon: "🤖" },
                 ].map((s) => (
                   <div key={s.label} className="card" style={{ textAlign: "center", minWidth: 160, padding: "1.5rem" }}>
