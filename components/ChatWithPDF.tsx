@@ -31,6 +31,7 @@ export function ChatWithPDF({ deckId, title }: { deckId: string; title: string }
     try {
       const res = await fetch(`/api/decks/${deckId}/chat`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query, history: history }),
       });
       const data = await res.json();
