@@ -79,10 +79,10 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 2): Promise<T> {
       return await fn();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      if (message.includes("503") && attempt < maxRetries - 1) {
+      if ((message.includes("503") || message.includes("429")) && attempt < maxRetries - 1) {
         attempt++;
-        const delay = Math.pow(2, attempt) * 1000;
-        console.log(`[Gemini] 503 error. Retrying in ${delay}ms...`);
+        const delay = Math.pow(2, attempt) * 2000; // longer backoff for quota errors
+        console.log(`[Gemini] Rate limit hit. Retrying in ${delay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
       } else {
         throw error;
@@ -179,16 +179,15 @@ ${text.slice(0, 50000)}
 export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<GeneratedDeck & { rawText: string }> {
   console.log("[Gemini] Starting universal PDF processing...");
   
-  // 1. ROBUST LOCAL EXTRACTION via pdf-parse (server-safe)
+  // 1. LOCAL EXTRACTION via pdf-parse v1 (simple function API)
   try {
     console.log("[Gemini] Attempting local text extraction...");
-    // Dynamic require to avoid bundler issues
-    const pdfParse = (await import("pdf-parse")).default;
+    const pdfParse = require("pdf-parse");
     const data = await pdfParse(pdfBuffer);
-    const text = data?.text?.trim();
+    const text = (data?.text || "").trim();
 
-    if (text && text.length > 50) {
-      console.log(`[Gemini] Local extraction successful (${text.length} chars).`);
+    if (text.length > 50) {
+      console.log(`[Gemini] Local extraction successful (${text.length} chars). Sending text to AI...`);
       const generated = await generateFlashcardsFromText(text);
       return { ...generated, rawText: text };
     }
@@ -197,10 +196,10 @@ export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<Gene
     console.warn(`[Gemini] Local extraction failed: ${err.message}. Trying AI Multimodal...`);
   }
 
-  // 2. FALLBACK TO AI MULTIMODAL (Gemini's native PDF support)
+  // 2. FALLBACK: send base64 PDF to Gemini (multimodal)
   try {
     const base64Data = pdfBuffer.toString("base64");
-    const prompt = `${SYSTEM_PROMPT}\n\nIMPORTANT: Extract all key info and return JSON. Also include a section ---RAW_TEXT--- with the full text.`;
+    const prompt = `${SYSTEM_PROMPT}\n\nIMPORTANT: Extract all key info from this PDF and return JSON. Also include a section ---RAW_TEXT--- with the full extracted text.`;
 
     const result = await executeWithKeyRotation<any>(model =>
       model.generateContent({
@@ -221,20 +220,12 @@ export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<Gene
 
     return { ...deck, rawText };
   } catch (error: any) {
-    console.error("[Gemini] All PDF methods failed:", error);
-    
-    // FINAL ATTEMPT: Try Local Ollama if Gemini fails
-    try {
-      console.log("[Gemini] Falling back to local Ollama...");
-      // We need text for Ollama, so if we're here, multimodal failed.
-      // We'll try one last time to extract text locally or just fail.
-      throw error; 
-    } catch (finalErr) {
-      throw new Error(`Critical PDF Error: ${error.message || "Could not process file"}. 
-      TIPS TO FIX: 
-      1. Ensure your GEMINI_API_KEY in .env has NO quotes around it.
-      2. If using local AI, run 'ollama run llama3' first.`);
+    console.error("[Gemini] All PDF methods failed:", error.message);
+    const isQuota = error.message?.includes("429") || error.message?.includes("quota");
+    if (isQuota) {
+      throw new Error("API quota exhausted for today. Your free-tier Gemini keys have hit the daily limit. Please wait 24 hours or add a new API key to your .env file.");
     }
+    throw new Error(`PDF processing failed: ${error.message || "Unknown error"}`);
   }
 }
 // Chat with Document
