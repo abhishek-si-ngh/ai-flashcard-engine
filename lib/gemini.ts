@@ -96,7 +96,8 @@ async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Pr
   const apiKeys = keysStr.split(",").map(k => k.trim()).filter(k => k);
   
   // Using specific stable versions as recommended
-  const MODELS_TO_TRY = ["gemini-2.0-flash-exp", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"];
+  // Ultra-Stable Model List
+  const MODELS_TO_TRY = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp"];
 
   if (apiKeys.length === 0) {
     throw new Error("No Gemini API keys provided.");
@@ -109,23 +110,15 @@ async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Pr
     
     for (const modelId of MODELS_TO_TRY) {
       try {
-        console.log(`[Gemini] Trying Key ${i + 1} with Model ${modelId}`);
-        
-        // Let the SDK handle the API versioning automatically
+        console.log(`[Gemini] Key ${i + 1} | Model ${modelId} | Attempting...`);
         const model = genAI.getGenerativeModel({ model: modelId });
-        
         return await withRetry(() => action(model));
       } catch (error: any) {
         lastError = error;
         const message = error.message || String(error);
-        
-        if (message.includes("404") || message.includes("not found")) {
-          console.warn(`[Gemini] Variant ${modelId} failed. Trying next...`);
-          continue;
-        }
-        
-        console.error(`[Gemini] Key ${i + 1} failed: ${message}`);
-        break; 
+        console.warn(`[Gemini] Key ${i+1}/${modelId} Failed: ${message.slice(0, 100)}... Trying next option.`);
+        // Try next model or next key regardless of error type
+        continue;
       }
     }
   }
