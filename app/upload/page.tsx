@@ -1,6 +1,7 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
 
 export default function UploadPage() {
@@ -11,6 +12,15 @@ export default function UploadPage() {
   const [status, setStatus] = useState<"idle" | "uploading" | "generating" | "done" | "error">("idle");
   const [error, setError] = useState("");
   const [progress, setProgress] = useState(0);
+  const [isGuest, setIsGuest] = useState(false);
+
+  useEffect(() => {
+    // Check if user is signed in by hitting the session endpoint
+    fetch("/api/auth/session")
+      .then(r => r.json())
+      .then(data => setIsGuest(!data?.user))
+      .catch(() => setIsGuest(true));
+  }, []);
 
   function handleFile(f: File) {
     if (f.type !== "application/pdf") { setError("Please upload a PDF file."); return; }
@@ -32,7 +42,9 @@ export default function UploadPage() {
       setStatus("generating");
       setProgress(50);
 
-      const res = await fetch("/api/generate", { method: "POST", body: fd });
+      // Use guest route if not signed in
+      const endpoint = isGuest ? "/api/guest/generate" : "/api/generate";
+      const res = await fetch(endpoint, { method: "POST", body: fd });
       setProgress(90);
 
       if (!res.ok) {
@@ -44,7 +56,13 @@ export default function UploadPage() {
       setProgress(100);
       setStatus("done");
 
-      setTimeout(() => router.push(`/deck/${data.deck.id}`), 600);
+      if (isGuest) {
+        // Store deck in sessionStorage, redirect to guest study page
+        sessionStorage.setItem("guest_deck", JSON.stringify(data.deck));
+        setTimeout(() => router.push("/guest-deck"), 600);
+      } else {
+        setTimeout(() => router.push(`/deck/${data.deck.id}`), 600);
+      }
     } catch (e) {
       setStatus("error");
       setError(e instanceof Error ? e.message : "Something went wrong");
@@ -58,6 +76,15 @@ export default function UploadPage() {
       <Sidebar />
       <main className="main-content" style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
         <div style={{ width: "100%", maxWidth: 580, animation: "fadeUp 0.5s ease" }}>
+
+          {/* Guest Banner */}
+          {isGuest && (
+            <div style={{ background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.3)", borderRadius: "var(--radius-sm)", padding: "0.75rem 1.2rem", marginBottom: "1.5rem", fontSize: "0.825rem", color: "var(--accent-light)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+              <span>👤 You&apos;re in <strong>Guest Mode</strong> — cards won&apos;t be saved after you close the browser.</span>
+              <Link href="/api/auth/signin" className="btn btn-primary btn-sm">Sign In to Save</Link>
+            </div>
+          )}
+
           <div style={{ marginBottom: "2rem" }}>
             <h1 style={{ marginBottom: "0.5rem" }}>Create New Deck</h1>
             <p style={{ color: "var(--text-secondary)" }}>Upload a PDF and let AI generate your flashcards</p>
@@ -150,7 +177,7 @@ export default function UploadPage() {
           </button>
 
           <p style={{ textAlign: "center", color: "var(--text-muted)", fontSize: "0.75rem", marginTop: "1rem" }}>
-            Powered by Google Gemini 1.5 Flash · Usually takes 10-20 seconds
+            Powered by Google Gemini 2.0 Flash · Usually takes 10-20 seconds
           </p>
 
           {/* Tips */}
