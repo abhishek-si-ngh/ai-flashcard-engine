@@ -5,7 +5,6 @@ export default auth((req) => {
   const isLoggedIn = !!req.auth;
   const isProtectedRoute = 
     req.nextUrl.pathname.startsWith('/library') || 
-    req.nextUrl.pathname.startsWith('/upload') || 
     req.nextUrl.pathname.startsWith('/deck') || 
     req.nextUrl.pathname.startsWith('/study');
                            
