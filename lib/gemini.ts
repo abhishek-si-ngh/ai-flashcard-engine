@@ -100,9 +100,8 @@ async function executeWithKeyRotation<T>(action: (model: any) => Promise<T>): Pr
     .map(k => k.trim().replace(/^["']|["']$/g, ""))
     .filter(k => k);
   
-  // Using specific stable versions as recommended
-  // Ultra-Stable Model List
-  const MODELS_TO_TRY = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp"];
+  // Models confirmed available for this API key
+  const MODELS_TO_TRY = ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.0-flash-lite"];
 
   if (apiKeys.length === 0) {
     throw new Error("No Gemini API keys provided.");
@@ -180,24 +179,22 @@ ${text.slice(0, 50000)}
 export async function generateFlashcardsFromPDF(pdfBuffer: Buffer): Promise<GeneratedDeck & { rawText: string }> {
   console.log("[Gemini] Starting universal PDF processing...");
   
-  // 1. TRY LOCAL EXTRACTION FIRST (Most stable for text)
+  // 1. ROBUST LOCAL EXTRACTION via pdf-parse (server-safe)
   try {
-    const pdfLib = require("pdf-parse");
-    // Check every possible export location
-    const pdfReader = (typeof pdfLib === "function") ? pdfLib : (pdfLib.default || pdfLib.pdfParse || Object.values(pdfLib).find(v => typeof v === "function"));
-    
-    if (typeof pdfReader === "function") {
-      const data = await pdfReader(pdfBuffer);
-      const text = data?.text;
-      if (text && text.trim().length > 50) {
-        console.log(`[Gemini] Local extraction successful (${text.length} chars).`);
-        const generated = await generateFlashcardsFromText(text);
-        return { ...generated, rawText: text };
-      }
+    console.log("[Gemini] Attempting local text extraction...");
+    // Dynamic require to avoid bundler issues
+    const pdfParse = (await import("pdf-parse")).default;
+    const data = await pdfParse(pdfBuffer);
+    const text = data?.text?.trim();
+
+    if (text && text.length > 50) {
+      console.log(`[Gemini] Local extraction successful (${text.length} chars).`);
+      const generated = await generateFlashcardsFromText(text);
+      return { ...generated, rawText: text };
     }
-    console.warn("[Gemini] Local extraction failed or returned no text. Falling back to AI Multimodal...");
-  } catch (err) {
-    console.warn("[Gemini] Local PDF reader failed to load. Trying AI Multimodal fallback...");
+    console.warn("[Gemini] Local extraction returned too little text. Trying AI Multimodal...");
+  } catch (err: any) {
+    console.warn(`[Gemini] Local extraction failed: ${err.message}. Trying AI Multimodal...`);
   }
 
   // 2. FALLBACK TO AI MULTIMODAL (Gemini's native PDF support)
