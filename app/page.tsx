@@ -184,9 +184,12 @@ export default async function HomePage() {
           <section style={{ padding: "5rem 2.5rem", textAlign: "center" }}>
             <h2 style={{ marginBottom: "1rem" }}>Ready to Study Smarter?</h2>
             <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>
-              Sign in with Google to create and save your smart flashcard decks.
+              Generate your first deck instantly without an account, or sign in to save your progress permanently.
             </p>
-            <div style={{ display: "flex", justifyContent: "center", gap: "1rem" }}>
+            <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>
+              <Link href="/upload" className="btn btn-secondary">
+                🚀 Try Guest Mode
+              </Link>
               <AuthButton />
             </div>
           </section>

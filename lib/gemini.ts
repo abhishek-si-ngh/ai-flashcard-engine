@@ -79,9 +79,15 @@ async function withRetry<T>(fn: () => Promise<T>, maxRetries = 2): Promise<T> {
       return await fn();
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
+      
+      // Fail fast if it's a hard daily quota limit, no point retrying
+      if (message.includes("quota exceeded") || message.includes("limit: 0")) {
+        throw error; 
+      }
+      
       if ((message.includes("503") || message.includes("429")) && attempt < maxRetries - 1) {
         attempt++;
-        const delay = Math.pow(2, attempt) * 2000; // longer backoff for quota errors
+        const delay = Math.pow(2, attempt) * 1000; // 2s, 4s maximum
         console.log(`[Gemini] Rate limit hit. Retrying in ${delay}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
       } else {
