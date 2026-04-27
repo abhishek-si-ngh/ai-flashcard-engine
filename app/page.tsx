@@ -132,11 +132,8 @@ export default async function HomePage() {
                 Drop in your notes or textbook chapter. Get back teacher-quality flashcards with gamified tracking and AI chat support.
               </p>
               <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-                <Link href="/upload" className="btn btn-primary btn-lg">
-                  <span>📄</span> Upload PDF — It&apos;s Free
-                </Link>
-                <Link href="/upload" className="btn btn-secondary btn-lg">
-                  <span>🚀</span> Try Without Sign In
+                <Link href="/upload" className="btn btn-primary btn-lg" style={{ padding: "0.8rem 2rem", fontSize: "1.1rem" }}>
+                  <span>🚀</span> Start for Free — No Sign In Required
                 </Link>
               </div>
             </section>
