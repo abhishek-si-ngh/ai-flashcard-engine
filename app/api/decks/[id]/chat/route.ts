@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { chatWithDocument } from "@/lib/gemini";
 
+export const maxDuration = 30;
+export const dynamic = "force-dynamic";
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
