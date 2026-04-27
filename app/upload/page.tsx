@@ -147,9 +147,8 @@ export default function UploadPage() {
           {/* Progress */}
           {isLoading && (
             <div style={{ marginTop: "1.5rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem", fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.5rem", fontSize: "0.8rem", color: "var(--text-secondary)" }}>
                 <span>{status === "uploading" ? "Uploading PDF…" : "🧠 AI generating cards…"}</span>
-                <span>{progress}%</span>
               </div>
               <div className="progress-bar">
                 <div className="progress-fill" style={{ width: `${progress}%` }} />
