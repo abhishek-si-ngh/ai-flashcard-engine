@@ -13,8 +13,10 @@ FlashForge is an AI-native study platform that transforms messy PDF documents in
 
 ### 🧠 Advanced Learning Engine
 *   **📄 AI PDF Ingestion**: Native PDF processing using Google Gemini 2.0 Flash. It extracts core concepts, definitions, worked examples, and **Cloze deletions**.
-*   **🤖 Chat with PDF**: Ask questions directly to your documents. Our AI tutor clarifies complex concepts using the source text as context.
+*   **🤖 Chat with Tutor**: Ask questions directly to your documents. Our AI tutor clarifies complex concepts using the source text as context.
 *   **🔁 SM-2 Spaced Repetition**: A custom implementation of the SuperMemo-2 algorithm that schedules card reviews based on your individual performance.
+*   **🌐 Guest Mode**: Instantly try out the core PDF upload and flashcard generation features without signing in (uses temporary `sessionStorage`).
+*   **🛡️ Resilient AI Pipeline**: Features automatic API key rotation, quota exhaustion handling (HTTP 429), and bulletproof pure-JS local PDF extraction fallback to guarantee generation stability.
 
 ### 🎮 Gamification & Engagement
 *   **🔥 Streak System**: Stay consistent with daily study streaks and personal records.
@@ -59,7 +61,7 @@ Create a `.env` file in the root directory:
 
 ```env
 DATABASE_URL="your-postgresql-url"
-GEMINI_API_KEY="your-gemini-api-key"
+GEMINI_API_KEY="key1,key2,key3" # Can be a single key or a comma-separated list for automatic rotation
 AUTH_SECRET="your-random-secret"
 AUTH_GOOGLE_ID="your-google-client-id"
 AUTH_GOOGLE_SECRET="your-google-client-secret"
